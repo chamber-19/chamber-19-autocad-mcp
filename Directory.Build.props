@@ -1,0 +1,6 @@
+<Project>
+  <!-- Allow dotnet restore on Linux/CI machines without Windows SDK for projects targeting net*-windows. -->
+  <PropertyGroup>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+</Project>

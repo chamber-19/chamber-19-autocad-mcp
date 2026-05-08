@@ -1,0 +1,36 @@
+# Build output
+bin/
+obj/
+out/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+
+# Bundle staging — regenerated on every build
+bundle/Chamber19.AutoCad.Mcp.bundle/Contents/
+
+# IDE
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Logs (local diagnostic only)
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

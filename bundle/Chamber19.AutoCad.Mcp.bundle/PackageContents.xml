@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ApplicationPackage SchemaVersion="1.0"
+                    AppVersion="0.1.0"
+                    AutodeskProduct="AutoCAD"
+                    Name="Chamber 19 AutoCAD MCP"
+                    Description="Chamber 19 MCP server plugin for AutoCAD"
+                    Author="Chamber 19"
+                    ProductCode="{13300AC4-E2D6-4CB9-B127-6E4724E0AB9F}"
+                    UpgradeCode="{F96ACC44-C728-43B7-8AFD-60C53E10CECB}">
+  <CompanyDetails Name="Chamber 19"
+                  Url="https://github.com/chamber-19" />
+  <Components Description="Chamber 19 AutoCAD MCP Server">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" />
+    <ComponentEntry AppName="Chamber19AutoCadMcp"
+                    Version="0.1.0"
+                    ModuleName="./Contents/Win64/Chamber19.AutoCad.Mcp.dll"
+                    AppDescription="Chamber 19 AutoCAD MCP Server"
+                    LoadOnAutoCADStartup="false"
+                    LoadOnRequest="true" />
+  </Components>
+</ApplicationPackage>

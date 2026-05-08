@@ -1,0 +1,98 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Chamber19.AutoCad.Mcp</RootNamespace>
+    <AssemblyName>Chamber19.AutoCad.Mcp</AssemblyName>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Version>0.1.0</Version>
+
+    <!-- AutoCAD version & TFM resolution. Floor 2025+, primary 2027.
+         AutoCAD 2027 ships on .NET 10 (its managed DLLs link System.Runtime 10.0.0.0).
+         AutoCAD 2025/2026 ship on .NET 8. -->
+    <AutoCadVersion Condition="'$(AutoCadVersion)' == ''">$([System.Environment]::GetEnvironmentVariable('AUTOCAD_VERSION'))</AutoCadVersion>
+    <AutoCadVersion Condition="'$(AutoCadVersion)' == ''">2027</AutoCadVersion>
+    <AutoCadTargetFramework Condition="'$(AutoCadTargetFramework)' == '' and $([MSBuild]::VersionGreaterThanOrEquals('$(AutoCadVersion)', '2027'))">net10.0-windows</AutoCadTargetFramework>
+    <AutoCadTargetFramework Condition="'$(AutoCadTargetFramework)' == ''">net8.0-windows</AutoCadTargetFramework>
+    <TargetFramework>$(AutoCadTargetFramework)</TargetFramework>
+
+    <AutoCadInstallDir Condition="'$(AutoCadInstallDir)' == ''">$([System.Environment]::GetEnvironmentVariable('AUTOCAD_INSTALL_DIR'))</AutoCadInstallDir>
+
+    <!-- AutoCAD's managed DLLs mix legacy BCL versions; downgrade MSB3277 to a build message so a real regression stays visible. -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
+  <!-- Resolve AutoCAD install dir: explicit AutoCadInstallDir env var → AutoCadVersion-substituted path → 2027 → 2026 → 2025. -->
+  <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and '$(AutoCadInstallDir)' != '' and Exists('$(AutoCadInstallDir)\accoremgd.dll')">
+    <ResolvedAutoCadInstallDir>$(AutoCadInstallDir)</ResolvedAutoCadInstallDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and Exists('C:\Program Files\Autodesk\AutoCAD $(AutoCadVersion)\accoremgd.dll')">
+    <ResolvedAutoCadInstallDir>C:\Program Files\Autodesk\AutoCAD $(AutoCadVersion)</ResolvedAutoCadInstallDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and Exists('C:\Program Files\Autodesk\AutoCAD 2027\accoremgd.dll')">
+    <ResolvedAutoCadInstallDir>C:\Program Files\Autodesk\AutoCAD 2027</ResolvedAutoCadInstallDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and Exists('C:\Program Files\Autodesk\AutoCAD 2026\accoremgd.dll')">
+    <ResolvedAutoCadInstallDir>C:\Program Files\Autodesk\AutoCAD 2026</ResolvedAutoCadInstallDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and Exists('C:\Program Files\Autodesk\AutoCAD 2025\accoremgd.dll')">
+    <ResolvedAutoCadInstallDir>C:\Program Files\Autodesk\AutoCAD 2025</ResolvedAutoCadInstallDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>$(ResolvedAutoCadInstallDir)\accoremgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>$(ResolvedAutoCadInstallDir)\acdbmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>$(ResolvedAutoCadInstallDir)\acmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateAutoCadManagedReferences" BeforeTargets="ResolveReferences">
+    <Error
+      Condition="'$(ResolvedAutoCadInstallDir)' == ''"
+      Text="Unable to locate AutoCAD managed DLLs. Set AUTOCAD_INSTALL_DIR (or AutoCadInstallDir) to your AutoCAD 2025+ install folder, e.g. C:\Program Files\Autodesk\AutoCAD 2027."
+    />
+    <Error
+      Condition="!Exists('$(ResolvedAutoCadInstallDir)\accoremgd.dll')"
+      Text="Missing accoremgd.dll under $(ResolvedAutoCadInstallDir)."
+    />
+    <Error
+      Condition="!Exists('$(ResolvedAutoCadInstallDir)\acdbmgd.dll')"
+      Text="Missing acdbmgd.dll under $(ResolvedAutoCadInstallDir)."
+    />
+    <Error
+      Condition="!Exists('$(ResolvedAutoCadInstallDir)\acmgd.dll')"
+      Text="Missing acmgd.dll under $(ResolvedAutoCadInstallDir)."
+    />
+    <Message Importance="High" Text="Chamber19.AutoCad.Mcp using AutoCAD refs from: $(ResolvedAutoCadInstallDir)" />
+    <Message Importance="High" Text="Chamber19.AutoCad.Mcp target framework: $(TargetFramework) (override via /p:AutoCadTargetFramework=... or /p:AutoCadVersion=...)" />
+  </Target>
+
+  <!-- Stage build output into the bundle layout so install-bundle.ps1 can drop it into ApplicationPlugins\. -->
+  <Target Name="StageBundle" AfterTargets="Build" Condition="'$(SkipBundleStage)' != 'true'">
+    <PropertyGroup>
+      <BundleStageDir>$(MSBuildThisFileDirectory)..\..\bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\</BundleStageDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <BundlePayload Include="$(OutDir)*.dll" />
+      <BundlePayload Include="$(OutDir)*.pdb" />
+      <BundlePayload Include="$(OutDir)*.deps.json" />
+      <BundlePayload Include="$(OutDir)*.runtimeconfig.json" />
+    </ItemGroup>
+    <RemoveDir Directories="$(BundleStageDir)" />
+    <MakeDir Directories="$(BundleStageDir)" />
+    <Copy SourceFiles="@(BundlePayload)" DestinationFolder="$(BundleStageDir)" SkipUnchangedFiles="true" />
+    <Message Importance="High" Text="Bundle staged at $(BundleStageDir)" />
+  </Target>
+
+</Project>

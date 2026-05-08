@@ -9,8 +9,8 @@ namespace Chamber19.AutoCad.Mcp.Tests;
 /// <summary>
 /// Tests <see cref="GetBlockAttributesTool.Serialize"/> with mocked <see cref="AttributeEntry"/>
 /// arrays representing what an AutoCAD BlockReference attribute walk would have produced.
-/// The actual AutoCAD-touching read path (<c>ReadAttributes</c>) is verified by the smoke test
-/// against a running AutoCAD; here we lock in the JSON shape clients depend on.
+/// The actual AutoCAD-touching read path (<c>ReadAttributes</c>) requires integration testing
+/// against a running AutoCAD instance; here we lock in the JSON shape clients depend on.
 /// </summary>
 public sealed class GetBlockAttributesToolTests
 {

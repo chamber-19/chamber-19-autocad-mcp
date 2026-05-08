@@ -7,7 +7,7 @@ namespace Chamber19.AutoCad.Mcp.Tests;
 /// <summary>
 /// Pure version-predicate tests for <see cref="AutoCadCompatibility"/>. The runtime
 /// integration (calling <c>Application.Version</c> and refusing to start when unsupported)
-/// is verified by the smoke test against a real AutoCAD; here we lock in the rule.
+/// requires integration testing against a running AutoCAD instance; here we lock in the rule.
 /// Floor: AutoCAD 2025 = R24.0.
 /// </summary>
 public sealed class AutoCadCompatibilityTests

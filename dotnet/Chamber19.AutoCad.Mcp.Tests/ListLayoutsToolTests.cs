@@ -9,8 +9,8 @@ namespace Chamber19.AutoCad.Mcp.Tests;
 /// <summary>
 /// Tests <see cref="ListLayoutsTool.Serialize"/> with mocked <see cref="LayoutInfo"/> arrays
 /// representing what an AutoCAD LayoutDictionary iteration would have produced.
-/// The actual AutoCAD-touching read path (<c>ReadLayouts</c>) is verified by the smoke test
-/// against a running AutoCAD; here we lock in the JSON shape clients depend on.
+/// The actual AutoCAD-touching read path (<c>ReadLayouts</c>) requires integration testing
+/// against a running AutoCAD instance; here we lock in the JSON shape clients depend on.
 /// </summary>
 public sealed class ListLayoutsToolTests
 {

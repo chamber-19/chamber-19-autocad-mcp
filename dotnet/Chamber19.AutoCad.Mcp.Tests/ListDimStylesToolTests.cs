@@ -46,12 +46,13 @@ public sealed class ListDimStylesToolTests
     [Fact]
     public void Serialize_TypicalDimStyleSet_MapsAllFieldsCorrectly()
     {
+        // Input already in the order ReadDimStyles would return: sorted by name, case-insensitive.
         var ts = new DateTimeOffset(2026, 5, 8, 12, 0, 0, TimeSpan.Zero);
         var dimStyles = new[]
         {
-            new DimStyleInfo("Standard", LineScale: 1.0, TextHeight: 2.5),
             new DimStyleInfo("ARCH", LineScale: 48.0, TextHeight: 3.0),
             new DimStyleInfo("METRIC-25", LineScale: 25.0, TextHeight: 2.0),
+            new DimStyleInfo("Standard", LineScale: 1.0, TextHeight: 2.5),
         };
 
         var json = ListDimStylesTool.Serialize(dimStyles, ts);
@@ -61,17 +62,18 @@ public sealed class ListDimStylesToolTests
         Assert.Equal(3, arr.Length);
         Assert.Equal(ts.ToString("O"), doc.RootElement.GetProperty("ts").GetString());
 
-        Assert.Equal("Standard", arr[0].GetProperty("name").GetString());
-        Assert.Equal(1.0, arr[0].GetProperty("lineScale").GetDouble());
-        Assert.Equal(2.5, arr[0].GetProperty("textHeight").GetDouble());
+        // ARCH comes first (case-insensitive sort: A < M < S).
+        Assert.Equal("ARCH", arr[0].GetProperty("name").GetString());
+        Assert.Equal(48.0, arr[0].GetProperty("lineScale").GetDouble());
+        Assert.Equal(3.0, arr[0].GetProperty("textHeight").GetDouble());
 
-        Assert.Equal("ARCH", arr[1].GetProperty("name").GetString());
-        Assert.Equal(48.0, arr[1].GetProperty("lineScale").GetDouble());
-        Assert.Equal(3.0, arr[1].GetProperty("textHeight").GetDouble());
+        Assert.Equal("METRIC-25", arr[1].GetProperty("name").GetString());
+        Assert.Equal(25.0, arr[1].GetProperty("lineScale").GetDouble());
+        Assert.Equal(2.0, arr[1].GetProperty("textHeight").GetDouble());
 
-        Assert.Equal("METRIC-25", arr[2].GetProperty("name").GetString());
-        Assert.Equal(25.0, arr[2].GetProperty("lineScale").GetDouble());
-        Assert.Equal(2.0, arr[2].GetProperty("textHeight").GetDouble());
+        Assert.Equal("Standard", arr[2].GetProperty("name").GetString());
+        Assert.Equal(1.0, arr[2].GetProperty("lineScale").GetDouble());
+        Assert.Equal(2.5, arr[2].GetProperty("textHeight").GetDouble());
     }
 
     [Fact]

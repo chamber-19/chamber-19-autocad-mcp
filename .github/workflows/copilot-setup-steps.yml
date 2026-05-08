@@ -33,8 +33,15 @@ jobs:
 
             - name: Expose AutoCAD stub path and skip bundle stage
               run: |
-                  echo "AUTOCAD_INSTALL_DIR=$GITHUB_WORKSPACE/dotnet/AutoCad.Stubs/output" >> "$GITHUB_ENV"
+                  echo "AUTOCAD_INSTALL_DIR=$GITHUB_WORKSPACE/dotnet/AutoCad.Stubs/accoremgd/bin/Release/net10.0-windows" >> "$GITHUB_ENV"
                   echo "SkipBundleStage=true" >> "$GITHUB_ENV"
+
+            - name: Verify AutoCAD stub DLL path
+              run: |
+                  test -f "$AUTOCAD_INSTALL_DIR/accoremgd.dll"
+                  test -f "$AUTOCAD_INSTALL_DIR/acdbmgd.dll"
+                  test -f "$AUTOCAD_INSTALL_DIR/acmgd.dll"
+                  ls -la "$AUTOCAD_INSTALL_DIR"
 
             - name: Restore NuGet packages
               run: dotnet restore Chamber19.AutoCad.Mcp.sln

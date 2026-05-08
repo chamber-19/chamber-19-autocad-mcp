@@ -44,7 +44,18 @@ definition name matches `blockName`. All subsequent instances of the same block 
 creation date, or any other user-visible property. If attribute values differ between
 instances, clients have no way to request a specific instance through this tool.
 
+### `chamber19_enumerate_block_attributes` — all matching instances
+
+Complements `chamber19_get_block_attributes` by returning attributes for **every** placed
+instance of the named block. Each instance is represented as `{handle, attributes}` where
+`handle` is the AutoCAD entity handle (hex string, matching DXF group code 5 and the
+AutoLISP `(handent)` function). Instances are returned in block-table walk order (model
+space BTRs first, then paper-space BTRs). Returns an empty `instances` array when no
+drawing is open, the block is not found, or no instances exist.
+
 ## Status
+
+**Commit 13 — `chamber19_enumerate_block_attributes`.** Complements the existing `chamber19_get_block_attributes` by returning attributes for **every** placed instance of a named block. Walks all layout BTRs (model space + paper spaces) inside a read-only Transaction, resolves each `BlockReference` via `DynamicBlockTableRecord` (case-insensitive), and collects the `AttributeCollection` from every matching instance. Each instance is identified by its AutoCAD entity handle (hex string). Returns `{instances: [{handle, attributes: [{tag, value}]}], ts}`. Returns an empty `instances` array when no drawing is open, the block is not found, or no instances have attributes. Pattern from `autocad-knowledge/attributes.md` "Finding all instances of a named block". 4 new tests in `EnumerateBlockAttributesToolTests`; 59 tests total.
 
 **Commit 12 — `chamber19_count_entities_by_layer`.** Counts all entities on a named layer in the active drawing using `Editor.SelectAll(SelectionFilter)` with a single `DxfCode.LayerName` TypedValue. Searches the current space (model space when `TILEMODE=1`, active paper space otherwise); layer name matching is case-insensitive in AutoCAD's selection engine. Returns `{count, ts}` where `count=0` when no drawing is open, the layer does not exist, or no entities reside on it. Pattern from `autocad-knowledge/selection_sets.md`. 4 new tests in `CountEntitiesByLayerToolTests`; 55 tests total.
 

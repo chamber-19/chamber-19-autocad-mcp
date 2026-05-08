@@ -9,7 +9,7 @@ Attributes are tagged, editable text fields attached to a block insertion. Each 
 ## Key types
 
 | Type | Assembly | Role |
-|---|---|---|
+| --- | --- | --- |
 | `BlockTable` | `acdbmgd.dll` | Stores all block definitions in the drawing. |
 | `BlockTableRecord` (BTR) | `acdbmgd.dll` | A single block definition or layout. `HasAttributeDefinitions` is `true` when the definition contains attribute definitions. |
 | `BlockReference` | `acdbmgd.dll` | A placed instance of a block definition. |
@@ -101,7 +101,7 @@ foreach (ObjectId entityId in layoutBtr)
 ## Key properties on `AttributeReference`
 
 | Property | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `Tag` | `string` | The attribute tag name, as defined in the block definition. Always uppercase in standard AutoCAD drawings. |
 | `TextString` | `string` | The current value of the attribute for this insertion. Empty string if never filled in. |
 | `IsConstant` | `bool` | Constant attributes cannot be edited per-instance. Their `TextString` is fixed by the definition. |
@@ -118,3 +118,59 @@ All `BlockTable` and `BlockReference` reads must run on the AutoCAD application 
 - `AttributeCollection` is ordered; the order matches the order attributes were defined in the block editor.
 - `BlockTableRecord.HasAttributeDefinitions` can be tested before opening references to skip blocks with no attributes — an optimisation for large drawings. The tool does not need this guard because `AttributeCollection` will simply be empty for blocks without attributes.
 - For multi-line attribute values (`IsMTextAttribute == true`), access `att.MTextAttribute.Contents` instead of `att.TextString`.
+
+## Enumerating attribute values by tag across the drawing
+
+To gather every value for a target tag:
+
+1. Walk all layout BTRs (model space + paper spaces).
+2. For each `BlockReference`, resolve effective definition name via
+   `DynamicBlockTableRecord`.
+3. Iterate `AttributeCollection`.
+4. Match `AttributeReference.Tag` case-insensitively.
+5. Emit `{ blockName, handle, value }` where `handle` is the attribute handle.
+
+```csharp
+if (attribute.Tag.Equals(targetTag, StringComparison.OrdinalIgnoreCase))
+{
+    matches.Add(new
+    {
+        blockName = effective.Name,
+        handle = attribute.Handle.ToString(), // attribute handle, not parent block
+        value = attribute.TextString,
+    });
+}
+```
+
+Sort by `handle` (case-insensitive hex comparison) for stable output ordering.
+
+## Looking up a block by handle
+
+Handle lookup pattern:
+
+1. Parse the input as hexadecimal (DXF group code 5 semantics).
+2. Resolve with `Database.GetObjectId(false, new Handle(parsedHex), 0)`.
+3. Open object ForRead and verify it is a `BlockReference`.
+4. Resolve effective block name from `DynamicBlockTableRecord`.
+5. Read insertion point and `AttributeCollection`.
+
+```csharp
+if (!ulong.TryParse(handleText, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out var parsed))
+{
+    return; // malformed handle
+}
+
+var objectId = db.GetObjectId(false, new Handle(unchecked((long)parsed)), 0);
+var obj = tx.GetObject(objectId, OpenMode.ForRead);
+if (obj is not BlockReference bref)
+{
+    return; // handle exists but is not a block reference
+}
+```
+
+Recommended semantics for robust MCP tools:
+
+- Malformed handle -> return `found:false`.
+- Non-resolving handle -> return `found:false`.
+- Resolved non-block object -> return `found:false`.
+- Do not throw on expected bad input branches.

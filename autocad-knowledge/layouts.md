@@ -5,7 +5,7 @@
 A layout is a named paper-space tab (or the special Model tab) that holds a viewport arrangement for plotting. Every DWG always has at least one layout: **Model** (the model-space tab). Paper-space layouts are added by the user and each corresponds to a `BlockTableRecord` plus a `Layout` object stored in the Layout Dictionary.
 
 | Tab | Block name | Notes |
-|---|---|---|
+| --- | --- | --- |
 | **Model** | `*Model_Space` | Always present. `Layout.TabOrder == 0`. |
 | **Paper space 1** | `*Paper_Space` | The first paper-space tab. `TabOrder == 1`. |
 | **Paper space N** | `*Paper_Space0`, `*Paper_Space1`, … | Additional paper-space tabs. Tab order increments. |
@@ -48,7 +48,7 @@ results.Sort((a, b) => a.TabOrder.CompareTo(b.TabOrder));
 ### Key properties
 
 | Property | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `Database.LayoutDictionaryId` | `ObjectId` | Points to the `DBDictionary` that maps layout name → `Layout` ObjectId. |
 | `Layout.LayoutName` | `string` | The human-visible tab name (e.g., `"Model"`, `"Sheet 1"`). |
 | `Layout.TabOrder` | `int` | Left-to-right tab position. Model is always `0`; paper-space tabs start at `1`. |
@@ -60,3 +60,48 @@ results.Sort((a, b) => a.TabOrder.CompareTo(b.TabOrder));
 - Sorting by `TabOrder` is recommended before returning results so that consumers receive tabs in the visual left-to-right order rather than dictionary insertion order.
 - Opening `Layout` objects `OpenMode.ForWrite` (e.g., to rename a tab) must happen on the AutoCAD application thread. Use `AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync` for all layout reads and writes dispatched from Kestrel.
 - `LayoutManager.Current` is safe to call from any thread for reads; the `CurrentLayout` property returns the name of the currently active layout.
+
+## Finding blocks in a specific layout
+
+To find block references in a named layout:
+
+1. Iterate `LayoutDictionaryId` and locate a `Layout` whose `LayoutName` matches the input
+   (case-insensitive).
+2. If no match exists, return `layoutFound:false` with an empty block list.
+3. Open `Layout.BlockTableRecordId` and iterate entities in that BTR.
+4. Keep only `BlockReference` entities.
+5. Resolve each block's effective name through `DynamicBlockTableRecord` so dynamic insertions
+   map to canonical definition names.
+
+```csharp
+var layoutDict = (DBDictionary)tx.GetObject(db.LayoutDictionaryId, OpenMode.ForRead);
+Layout? targetLayout = null;
+foreach (DBDictionaryEntry entry in layoutDict)
+{
+    var layout = (Layout)tx.GetObject(entry.Value, OpenMode.ForRead);
+    if (layout.LayoutName.Equals(layoutName, StringComparison.OrdinalIgnoreCase))
+    {
+        targetLayout = layout;
+        break;
+    }
+}
+
+if (targetLayout is null)
+{
+    return; // layout not found
+}
+
+var layoutBtr = (BlockTableRecord)tx.GetObject(targetLayout.BlockTableRecordId, OpenMode.ForRead);
+foreach (ObjectId entityId in layoutBtr)
+{
+    if (tx.GetObject(entityId, OpenMode.ForRead) is not BlockReference bref)
+        continue;
+
+    var effective = (BlockTableRecord)tx.GetObject(bref.DynamicBlockTableRecord, OpenMode.ForRead);
+    string name = effective.Name;
+    string handle = bref.Handle.ToString();
+    var pt = bref.Position;
+}
+```
+
+Sort output by handle (case-insensitive hex string compare) for stable client results.

@@ -51,9 +51,11 @@ public class Database : DBObject
     public ObjectId DimStyleTableId { get; } = null!;
     public ObjectId LayoutDictionaryId { get; } = null!;
     public ObjectId LayerTableId { get; } = null!;
-    public ObjectIdCollection XrefBlockTableRecordIds { get; } = null!;
     public TransactionManager TransactionManager { get; } = null!;
     public string Filename { get; } = string.Empty;
+
+    public XrefGraph GetHostDwgXrefGraph(bool includeGhosts) => throw new NotImplementedException();
+    public ObjectId GetObjectId(bool createIfNotFound, Handle handle, int xrefId) => throw new NotImplementedException();
 }
 
 public abstract class Transaction : DBObject
@@ -81,8 +83,10 @@ public class BlockTableRecord : SymbolTableRecord, IEnumerable
     public bool IsAnonymous { get; }
     public bool IsLayout { get; }
     public bool IsDynamicBlock { get; }
+    public bool IsFromExternalReference { get; }
     public bool IsFromOverlayReference { get; }
-    public bool IsLoaded { get; }
+    public bool IsUnloaded { get; }
+    public XrefStatus XrefStatus { get; }
     public string PathName { get; } = string.Empty;
     public IEnumerator GetEnumerator() => throw new NotImplementedException();
 }
@@ -91,6 +95,7 @@ public class BlockReference : Entity
 {
     public ObjectId DynamicBlockTableRecord { get; } = null!;
     public AttributeCollection AttributeCollection { get; } = null!;
+    public Autodesk.AutoCAD.Geometry.Point3d Position { get; }
 }
 
 public class AttributeCollection : IEnumerable
@@ -102,6 +107,27 @@ public class AttributeReference : Entity
 {
     public string Tag { get; set; } = string.Empty;
     public string TextString { get; set; } = string.Empty;
+}
+
+public enum XrefStatus
+{
+    NotAnXref,
+    Resolved,
+    Unloaded,
+    Unreferenced,
+    FileNotFound,
+    Unresolved,
+}
+
+public class XrefGraph : DBObject
+{
+    public int NumNodes { get; }
+    public XrefGraphNode GetXrefNode(int index) => throw new NotImplementedException();
+}
+
+public class XrefGraphNode : DBObject
+{
+    public ObjectId BlockTableRecordId { get; } = null!;
 }
 
 public class AttributeDefinition : Entity
@@ -155,6 +181,7 @@ public class Layout : DBObject
 {
     public string LayoutName { get; } = string.Empty;
     public int TabOrder { get; }
+    public ObjectId BlockTableRecordId { get; } = null!;
 }
 
 public class TypedValue

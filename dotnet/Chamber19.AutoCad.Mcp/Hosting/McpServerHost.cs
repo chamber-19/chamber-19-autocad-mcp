@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Chamber19.AutoCad.Mcp.Diagnostics;
+using Chamber19.AutoCad.Mcp.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ internal static class McpServerHost
     private static string? _bearerToken;
     private static DateTimeOffset _startedAt;
     private static string? _bootError;
+    private static int _processId;
 
     public static void Start()
     {
@@ -40,6 +42,26 @@ internal static class McpServerHost
             Log.Write("== McpServerHost.Start() ==");
 
             CapturePluginSnapshot();
+
+            // Runtime AutoCAD version check. Compile-time TFM rules already pin the build to
+            // an AutoCAD version, but a build copied to a host with a too-old AutoCAD would
+            // try to load and silently misbehave. Refuse to start the MCP server in that case.
+            Version? acadVersion = null;
+            try
+            {
+                acadVersion = Application.Version;
+            }
+            catch (Exception ex)
+            {
+                Log.WriteException("Could not read Application.Version for compatibility check.", ex);
+            }
+            if (!AutoCadCompatibility.IsSupported(acadVersion))
+            {
+                _bootError = AutoCadCompatibility.Describe(acadVersion);
+                Log.Write($"Refusing to start MCP host: {_bootError}");
+                return;
+            }
+            Log.Write($"Compat check OK: {AutoCadCompatibility.Describe(acadVersion)}");
 
             var port = PortAllocator.FindFreePort(IPAddress.Loopback);
             if (port is null)
@@ -69,6 +91,9 @@ internal static class McpServerHost
 
             var app = builder.Build();
             app.UseBearerAuth(token);
+            app.UseBackpressure(
+                () => AutoCadThreadDispatcher.QueueDepth,
+                () => AutoCadThreadDispatcher.QueueCapacity);
             app.MapMcp();
 
             Log.Write("Calling app.StartAsync() ...");
@@ -77,8 +102,9 @@ internal static class McpServerHost
 
             using var process = Process.GetCurrentProcess();
             var startedAt = DateTimeOffset.UtcNow;
+            var portFilePath = PortFile.GetPath(process.Id);
             PortFile.Write(url, token, process.Id, startedAt);
-            Log.Write($"Port file written to {PortFile.Path}");
+            Log.Write($"Port file written to {portFilePath}");
 
             lock (SyncRoot)
             {
@@ -86,6 +112,7 @@ internal static class McpServerHost
                 _boundUrl = url;
                 _bearerToken = token;
                 _startedAt = startedAt;
+                _processId = process.Id;
                 _bootError = null;
             }
 
@@ -101,12 +128,15 @@ internal static class McpServerHost
     public static void Stop()
     {
         WebApplication? app;
+        int pid;
         lock (SyncRoot)
         {
             app = _app;
+            pid = _processId;
             _app = null;
             _boundUrl = null;
             _bearerToken = null;
+            _processId = 0;
         }
 
         Log.Write("== McpServerHost.Stop() ==");
@@ -114,8 +144,12 @@ internal static class McpServerHost
         // Delete the port file FIRST. AutoCAD's plugin-terminate window is short and may force-kill
         // the process before StopAsync completes; deleting the discovery file up front guarantees
         // external readers can't see stale entries pointing at a dead process even in that case.
-        PortFile.Delete();
-        Log.Write($"Port file at {PortFile.Path} deleted (if present).");
+        if (pid > 0)
+        {
+            var portFilePath = PortFile.GetPath(pid);
+            PortFile.Delete(pid);
+            Log.Write($"Port file at {portFilePath} deleted (if present).");
+        }
 
         if (app is not null)
         {
@@ -141,12 +175,15 @@ internal static class McpServerHost
     {
         lock (SyncRoot)
         {
+            var portFilePath = _processId > 0
+                ? PortFile.GetPath(_processId)
+                : PortFile.DirectoryPath;
             return new StatusSnapshot(
                 Running: _app is not null,
                 BoundUrl: _boundUrl,
                 StartedAt: _app is not null ? _startedAt : null,
                 TokenLength: _bearerToken?.Length,
-                PortFilePath: PortFile.Path,
+                PortFilePath: portFilePath,
                 LogPath: Log.Path,
                 BootError: _bootError);
         }

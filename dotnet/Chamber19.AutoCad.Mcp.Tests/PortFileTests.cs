@@ -91,4 +91,26 @@ public sealed class PortFileTests : IDisposable
         // Second call on a missing file must not throw.
         PortFile.Delete(_targetPath);
     }
+
+    [Fact]
+    public void GetPath_ContainsPid_AndLandsInDirectoryPath()
+    {
+        var path = PortFile.GetPath(12345);
+
+        Assert.StartsWith(PortFile.DirectoryPath, path);
+        Assert.EndsWith("port.12345.txt", path);
+    }
+
+    [Fact]
+    public void GetPath_DifferentPids_ProduceDistinctPaths()
+    {
+        // The whole point of the pid-suffixed file: two AutoCAD instances must never
+        // race on a single port.txt.
+        var p1 = PortFile.GetPath(40704);
+        var p2 = PortFile.GetPath(26192);
+
+        Assert.NotEqual(p1, p2);
+        Assert.EndsWith("port.40704.txt", p1);
+        Assert.EndsWith("port.26192.txt", p2);
+    }
 }

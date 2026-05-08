@@ -18,7 +18,7 @@ This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our ow
 
 ## Status
 
-**Commit 2 — MCP server skeleton.** The plugin builds, bundles, NETLOADs into AutoCAD 2025/2026/2027, and runs an HTTP MCP server on a port in 5001–5050 with bearer auth, a `port.txt` discovery file, and one synthetic tool (`chamber19_ping`). No AutoCAD interaction yet — `chamber19_ping` returns only cached snapshot data captured during `Initialize()`. AutoCAD-touching tools land in commit 3.
+**Commit 3 — AutoCAD-thread dispatcher and first database-reading tool.** Adds `AutoCadThreadDispatcher` in `Threading/`, lifted from Suite's `SuiteCadPipeHost.InvokeOnApplicationThread` pattern: captures the AutoCAD application thread id during `Initialize`, attaches `Application.Idle` handler, queues callbacks from background threads (Kestrel) and runs them on the UI thread on the next idle tick. Async API: `Task InvokeOnApplicationThreadAsync(Action)` and `Task<T> InvokeOnApplicationThreadAsync<T>(Func<T>)`. The first tool that exercises the dispatcher is `chamber19_get_active_document`, returning `{name, path, isModified, ts}`. Builds on commit 2's MCP host (`chamber19_ping`, port file, bearer auth, RFC 6750 401).
 
 ## Requirements
 

@@ -9,8 +9,8 @@ namespace Chamber19.AutoCad.Mcp.Tests;
 /// <summary>
 /// Tests <see cref="CountEntitiesByLayerTool.Serialize"/> with mocked counts representing what
 /// the AutoCAD selection-set read path would have produced.
-/// The actual AutoCAD-touching read path (<c>CountEntities</c>) is verified by the smoke test
-/// against a running AutoCAD; here we lock in the JSON shape clients depend on.
+/// The actual AutoCAD-touching read path (<c>CountEntities</c>) requires integration testing
+/// against a running AutoCAD instance; here we lock in the JSON shape clients depend on.
 /// </summary>
 public sealed class CountEntitiesByLayerToolTests
 {

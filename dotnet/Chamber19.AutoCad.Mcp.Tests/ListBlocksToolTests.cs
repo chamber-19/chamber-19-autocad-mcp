@@ -9,8 +9,8 @@ namespace Chamber19.AutoCad.Mcp.Tests;
 /// <summary>
 /// Tests <see cref="ListBlocksTool.Serialize"/> with mocked <see cref="BlockInfo"/> arrays
 /// representing what an AutoCAD BlockTable walk + reference-count pass would have produced.
-/// The actual AutoCAD-touching read path (<c>ReadBlocks</c>) is verified by the smoke test
-/// against a running AutoCAD; here we lock in the JSON shape clients depend on.
+/// The actual AutoCAD-touching read path (<c>ReadBlocks</c>) requires integration testing
+/// against a running AutoCAD instance; here we lock in the JSON shape clients depend on.
 /// </summary>
 public sealed class ListBlocksToolTests
 {

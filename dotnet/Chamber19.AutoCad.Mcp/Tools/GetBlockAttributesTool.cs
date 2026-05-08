@@ -30,6 +30,12 @@ internal sealed record AttributeEntry(string Tag, string Value);
 /// <see cref="AttributeReference"/> ForRead to capture <see cref="AttributeReference.Tag"/>
 /// and <see cref="AttributeReference.TextString"/>.
 ///
+/// <b>First-instance semantics:</b> "First" means the first <see cref="BlockReference"/>
+/// encountered while iterating layout BTRs in block-table iteration order (model space BTR is
+/// visited first, followed by paper-space BTRs in layout-tab order). If the same block is
+/// placed multiple times, only the first encountered instance's attributes are returned; all
+/// other instances are ignored.
+///
 /// All AutoCAD reads run on the application thread via
 /// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
@@ -37,7 +43,7 @@ internal sealed record AttributeEntry(string Tag, string Value);
 public static class GetBlockAttributesTool
 {
     [McpServerTool(Name = "chamber19_get_block_attributes")]
-    [Description("Returns attributes for the first placed instance of the named block in the active AutoCAD drawing. Attributes are returned as [{tag, value}] in the order they appear in the AttributeCollection. Returns an empty attributes array when no drawing is open, the block is not found, or the first instance has no attributes. blockName is case-insensitive. Read-only; opens a database transaction.")]
+    [Description("Returns attributes for the first placed instance of the named block in the active AutoCAD drawing. \"First\" means the first BlockReference encountered while walking layout BTRs in block-table iteration order (model space is visited first, then paper-space tabs); if the block appears multiple times only the first instance's attributes are returned. Attributes are returned as [{tag, value}] in AttributeCollection order. Returns an empty attributes array when no drawing is open, the block is not found, or the first instance has no attributes. blockName is case-insensitive. Read-only; opens a database transaction.")]
     public static async Task<string> GetBlockAttributesAsync(
         [Description("Name of the block definition to query (case-insensitive).")]
         string blockName)

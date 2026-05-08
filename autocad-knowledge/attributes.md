@@ -26,6 +26,13 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 ## Reading attributes from the first instance of a named block
 
+> **First-instance limitation:** this pattern returns attributes from the **first**
+> `BlockReference` encountered while iterating layout BTRs in block-table iteration order.
+> The model-space BTR is visited first, followed by paper-space BTRs. If a block is placed
+> multiple times, only the first encountered instance's attributes are captured; all other
+> instances are silently ignored. To read attributes from *all* instances, see
+> [Finding all instances of a named block](#finding-all-instances-of-a-named-block) below.
+
 ```csharp
 var doc = Application.DocumentManager.MdiActiveDocument;
 var db = doc.Database;

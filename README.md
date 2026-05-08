@@ -18,6 +18,12 @@ This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our ow
 
 ## Status
 
+**Commit 12 — `chamber19_count_entities_by_layer`.** Counts all entities on a named layer in the active drawing using `Editor.SelectAll(SelectionFilter)` with a single `DxfCode.LayerName` TypedValue. Searches the current space (model space when `TILEMODE=1`, active paper space otherwise); layer name matching is case-insensitive in AutoCAD's selection engine. Returns `{count, ts}` where `count=0` when no drawing is open, the layer does not exist, or no entities reside on it. Pattern from `autocad-knowledge/selection_sets.md`. 4 new tests in `CountEntitiesByLayerToolTests`; 55 tests total.
+
+**Commit 11 — `chamber19_list_dimstyles`.** Lists all dimension styles in the active drawing. Opens `Database.DimStyleTableId` as a `DimStyleTable` ForRead inside a read-only Transaction, projects each `DimStyleTableRecord` to `{name, lineScale, textHeight}` where `lineScale` is `Dimscale` (overall scale factor) and `textHeight` is `Dimtxt` (primary-units text height). Returns `{dimStyles: [{name, lineScale, textHeight}], ts}`. 4 new tests in `ListDimStylesToolTests`; 51 tests total.
+
+**Commit 10 — per-PID port discovery + harness expansion.** Refactored `PortFile` from a single `port.txt` to per-process `port.{pid}.txt` at `%LOCALAPPDATA%\Chamber19\autocad-mcp\`. Multiple AutoCAD instances no longer race on a shared file; clients glob `port.*.txt` in the directory to discover all running MCP servers on the host. Added `PortFile.GetPath(pid)` and expanded the test harness with `PortFileTests.GetPath_*` (2 new tests), `AutoCadCompatibilityTests` (5 tests, including 1 theory with 7 cases), `AutoCadThreadDispatcherTests` (6 tests covering queue-cap and initialization guards), and `BackpressureTests` (4 tests covering the 429 middleware via ASP.NET TestHost); 47 tests total after this commit.
+
 **Commit 9 — `chamber19_get_block_attributes`.** Reads attribute values from the first placed instance of a named block. Walks every layout BTR (model space + paper spaces) inside a read-only Transaction, finds the first `BlockReference` whose effective definition (resolved via `DynamicBlockTableRecord`) matches the requested `blockName` (case-insensitive), then iterates its `AttributeCollection` and opens each `AttributeReference` ForRead to capture `Tag` and `TextString`. Returns `{attributes: [{tag, value}], ts}`. Returns an empty `attributes` array when no drawing is open, the block is not found, or the first instance has no attributes. Pattern from `autocad-knowledge/attributes.md`. 4 new tests in `GetBlockAttributesToolTests`; 30 tests total.
 
 **Commit 8 — `chamber19_list_layouts`.** Lists all layout tabs in the active drawing. Iterates `Database.LayoutDictionaryId` (a `DBDictionary`) inside a read-only Transaction, opens each `Layout` ForRead, and projects to `{name, isCurrent, tabOrder}`. `isCurrent` is derived from `LayoutManager.Current.CurrentLayout`. Results are sorted by `tabOrder` (0 = Model, 1+ = paper-space tabs). Returns `{layouts: [{name, isCurrent, tabOrder}], ts}`. Pattern documented in the new `autocad-knowledge/layouts.md`. 4 new tests in `ListLayoutsToolTests`; 26 tests total.
@@ -91,6 +97,7 @@ See `.github/copilot-instructions.md` for the full table. Summary:
 - Dual-target `net8.0-windows;net10.0-windows`, selected by `AutoCadVersion`
 - HTTP MCP transport (Kestrel + `ModelContextProtocol.AspNetCore`)
 - Auth ON by default, bearer token written to port file
+- Per-PID port file at `%LOCALAPPDATA%\Chamber19\autocad-mcp\port.{pid}.txt`; clients glob `port.*.txt` to discover all running instances
 - No activation gate (toolkit concern, not per-app)
 
 ## License

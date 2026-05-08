@@ -65,6 +65,12 @@ var filter = new SelectionFilter(new[]
 `Editor.SelectAll(SelectionFilter)` selects all entities in the **current space** (model space
 when `TILEMODE=1`; active paper space when `TILEMODE=0`) that match the filter.
 
+> **Current-space limitation:** entities that reside on the same layer (or match any other
+> filter criterion) but are located in a *different* space are **not** included in the
+> selection. "Current space" is model space when `TILEMODE=1`; it is the active paper space
+> when `TILEMODE=0`. To count or select entities across all spaces, switch to each space
+> (`TILEMODE`, `PSPACE`, `MSPACE`) and repeat the call.
+
 ```csharp
 var result = editor.SelectAll(filter);
 if (result.Status != PromptStatus.OK)

@@ -16,6 +16,34 @@ This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our ow
 >
 > Restart AutoCAD after renaming. Without this step, our plugin's `MCPSTATUS` will show `MCP server FAILED to start` and the HTTP server will not bind.
 
+## Tool semantics
+
+Important behavioral contracts that clients must understand:
+
+### `chamber19_count_entities_by_layer` — current-space only
+
+`Editor.SelectAll` operates on the **current space** only.
+
+| TILEMODE value | "Current space" |
+|---|---|
+| `1` (default, tiled viewports) | Model space |
+| `0` (paper space active) | Active paper space tab |
+
+Entities on the queried layer that live in a *different* space (e.g. model-space entities when
+a paper-space tab is active, or vice versa) are **not** counted. `count=0` can therefore mean
+either "no entities on that layer in this drawing" or "no entities in the current space on that
+layer." To count across all spaces, activate each space in turn and call the tool again.
+
+### `chamber19_get_block_attributes` — first matching instance only
+
+The tool walks layout BTRs in block-table iteration order (model space is visited first, then
+paper-space BTRs) and returns the attributes of the **first** `BlockReference` whose effective
+definition name matches `blockName`. All subsequent instances of the same block are ignored.
+
+"First" is therefore determined by block-table walk order, **not** by insertion order,
+creation date, or any other user-visible property. If attribute values differ between
+instances, clients have no way to request a specific instance through this tool.
+
 ## Status
 
 **Commit 12 — `chamber19_count_entities_by_layer`.** Counts all entities on a named layer in the active drawing using `Editor.SelectAll(SelectionFilter)` with a single `DxfCode.LayerName` TypedValue. Searches the current space (model space when `TILEMODE=1`, active paper space otherwise); layer name matching is case-insensitive in AutoCAD's selection engine. Returns `{count, ts}` where `count=0` when no drawing is open, the layer does not exist, or no entities reside on it. Pattern from `autocad-knowledge/selection_sets.md`. 4 new tests in `CountEntitiesByLayerToolTests`; 55 tests total.

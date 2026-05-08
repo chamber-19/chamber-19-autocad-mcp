@@ -20,6 +20,12 @@ namespace Chamber19.AutoCad.Mcp.Tools;
 /// call <see cref="Editor.SelectAll(SelectionFilter)"/> to count entities in the current space.
 /// Layer name matching is case-insensitive in AutoCAD's selection engine.
 ///
+/// <b>Current-space semantics:</b> <see cref="Editor.SelectAll"/> searches only the current
+/// space — model space when <c>TILEMODE=1</c>, active paper space when <c>TILEMODE=0</c>.
+/// Entities on the same layer that exist in a different space are <b>not</b> included in the
+/// returned count. To count entities in all spaces, switch to each space and call the tool
+/// again.
+///
 /// All AutoCAD interactions run on the application thread via
 /// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 ///

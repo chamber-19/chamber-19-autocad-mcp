@@ -4,9 +4,21 @@ A C# AutoCAD .NET plugin that loads inside `acad.exe` and acts as an MCP server.
 
 This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our own MCP server inside acad.exe and expose our own tools.
 
+## Known limitations — read before installing
+
+> **Autodesk's `AutoCAD-MCP-Server-2027.bundle` must be disabled before installing this plugin.** Both plugins ship the `ModelContextProtocol` C# SDK, both load into AutoCAD's default `AssemblyLoadContext`, and the version mismatch (Autodesk pins `0.4.0`, we use a current release) causes our plugin to fail at startup with a `TypeLoadException`. Until [issue #3 — ALC isolation for MCP SDK to coexist with Autodesk's acmcp.dll bundle](https://github.com/chamber-19/chamber-19-autocad-mcp/issues/3) is resolved, you must rename Autodesk's bundle folder before installing this one:
+>
+> ```powershell
+> # Run from an elevated PowerShell. Reverse with the opposite rename.
+> Rename-Item "C:\Program Files\Autodesk\ApplicationPlugins\AutoCAD-MCP-Server-2027.bundle" `
+>             "AutoCAD-MCP-Server-2027.bundle-disabled"
+> ```
+>
+> Restart AutoCAD after renaming. Without this step, our plugin's `MCPSTATUS` will show `MCP server FAILED to start` and the HTTP server will not bind.
+
 ## Status
 
-**Commit 1 — empty NETLOAD shell.** The plugin builds, bundles, NETLOADs into AutoCAD 2025/2026/2027, and registers a single diagnostic command (`MCPSTATUS`). No MCP server, no tools, no AutoCAD interaction yet — that's commit 2 and beyond.
+**Commit 2 — MCP server skeleton.** The plugin builds, bundles, NETLOADs into AutoCAD 2025/2026/2027, and runs an HTTP MCP server on a port in 5001–5050 with bearer auth, a `port.txt` discovery file, and one synthetic tool (`chamber19_ping`). No AutoCAD interaction yet — `chamber19_ping` returns only cached snapshot data captured during `Initialize()`. AutoCAD-touching tools land in commit 3.
 
 ## Requirements
 

@@ -1,5 +1,6 @@
-using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
+using Chamber19.AutoCad.Mcp.Diagnostics;
+using Chamber19.AutoCad.Mcp.Hosting;
 
 [assembly: ExtensionApplication(typeof(Chamber19.AutoCad.Mcp.Extension))]
 
@@ -9,11 +10,13 @@ public sealed class Extension : IExtensionApplication
 {
     public void Initialize()
     {
-        Trace.WriteLine("[Chamber19.AutoCad.Mcp] Initialize() — commit 1 shell, MCP server not yet wired.");
+        Log.Write("Extension.Initialize() entered.");
+        McpServerHost.Start();
     }
 
     public void Terminate()
     {
-        Trace.WriteLine("[Chamber19.AutoCad.Mcp] Terminate().");
+        Log.Write("Extension.Terminate() entered.");
+        McpServerHost.Stop();
     }
 }

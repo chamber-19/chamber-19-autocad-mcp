@@ -1,7 +1,6 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
+using Chamber19.AutoCad.Mcp.Hosting;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 [assembly: CommandClass(typeof(Chamber19.AutoCad.Mcp.Commands))]
@@ -19,15 +18,30 @@ public sealed class Commands
             return;
         }
 
-        using var process = Process.GetCurrentProcess();
-        var assembly = typeof(Commands).Assembly;
-        var assemblyName = assembly.GetName();
-        var version = assemblyName.Version?.ToString() ?? "0.0.0";
-        var runtime = RuntimeInformation.FrameworkDescription;
+        var status = McpServerHost.GetStatus();
 
-        editor.WriteMessage(
-            $"\n[Chamber19] MCP server not yet wired (commit 1 shell). " +
-            $"Plugin {assemblyName.Name} v{version} loaded into {process.ProcessName} (pid={process.Id}) on {runtime}.\n"
-        );
+        if (status.Running)
+        {
+            editor.WriteMessage(
+                $"\n[Chamber19] MCP server RUNNING.\n" +
+                $"  URL:        {status.BoundUrl}\n" +
+                $"  Started:    {status.StartedAt:O}\n" +
+                $"  Auth:       Bearer (token length {status.TokenLength}, see port file)\n" +
+                $"  Port file:  {status.PortFilePath}\n" +
+                $"  Log file:   {status.LogPath}\n");
+        }
+        else if (status.BootError is not null)
+        {
+            var firstLine = status.BootError.Split('\n', 2)[0].Trim();
+            editor.WriteMessage(
+                $"\n[Chamber19] MCP server FAILED to start.\n" +
+                $"  Error:    {firstLine}\n" +
+                $"  Log file: {status.LogPath}\n");
+        }
+        else
+        {
+            editor.WriteMessage(
+                $"\n[Chamber19] MCP server NOT RUNNING. Log file: {status.LogPath}\n");
+        }
     }
 }

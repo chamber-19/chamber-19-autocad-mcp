@@ -8,7 +8,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
 
     <!-- AutoCAD version & TFM resolution. Floor 2025+, primary 2027.
          AutoCAD 2027 ships on .NET 10 (its managed DLLs link System.Runtime 10.0.0.0).
@@ -41,6 +41,11 @@
   <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and Exists('C:\Program Files\Autodesk\AutoCAD 2025\accoremgd.dll')">
     <ResolvedAutoCadInstallDir>C:\Program Files\Autodesk\AutoCAD 2025</ResolvedAutoCadInstallDir>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.3.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="accoremgd">

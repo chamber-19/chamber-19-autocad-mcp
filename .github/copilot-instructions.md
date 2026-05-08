@@ -73,10 +73,10 @@ In AutoCAD: run `MCPSTATUS` to print plugin/runtime info to the editor.
 
 ## Slice plan reminder
 
-Commit 1 (this commit): empty NETLOAD shell that proves the build and bundle work. **No MCP code yet.**
+**Commit 1 (done):** empty NETLOAD shell — build, bundle, install script, IExtensionApplication shell, MCPSTATUS placeholder. No MCP code.
 
-Commit 2: wire `ModelContextProtocol` + `ModelContextProtocol.AspNetCore`. Start an HTTP MCP server inside `Initialize()` with one synthetic tool (`chamber19_ping`). Publish port + bearer token to `port.txt`.
+**Commit 2 (done):** MCP server skeleton — `ModelContextProtocol` + `ModelContextProtocol.AspNetCore` wired. Kestrel host binds first free port in 5001–5050, bearer auth (RFC 6750 401), 32-byte token, port file at `%LOCALAPPDATA%\Chamber19\autocad-mcp\port.txt` with shape `{url, token, pid, started}`, single synthetic `chamber19_ping` tool returning `{ok, autocadVersion, plugin, ts}`. No AutoCAD interaction yet — `chamber19_ping` reads only cached snapshot data captured during `Initialize()`.
 
-Commit 3: port the AutoCAD-thread marshaling pattern from Suite's `SuiteCadPipeHost` into an `AutoCadThreadDispatcher`. Expose one read-only AutoCAD-touching tool (e.g., `getActiveDocument`).
+**Commit 3 (next):** port the AutoCAD-thread marshaling pattern from Suite's `SuiteCadPipeHost` into an `AutoCadThreadDispatcher`. Expose one read-only AutoCAD-touching tool (e.g., `getActiveDocument`).
 
-Slice 4+: introduce `fixtures/` with sample DWGs and `expected.json` per fixture as the eval discipline for read-only tools.
+**Slice 4+:** introduce `fixtures/` with sample DWGs and `expected.json` per fixture as the eval discipline for read-only tools.

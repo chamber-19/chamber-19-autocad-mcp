@@ -30,6 +30,9 @@ internal sealed record DimStyleInfo(
 /// dimension scale factor (exposed as <c>lineScale</c>) and
 /// <see cref="DimStyleTableRecord.Dimtxt"/> is the primary-units text height.
 ///
+/// Results are sorted by <c>name</c> (case-insensitive, ordinal). This ordering is stable
+/// and guaranteed; clients may depend on it.
+///
 /// All AutoCAD reads run on the application thread via
 /// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
@@ -37,7 +40,7 @@ internal sealed record DimStyleInfo(
 public static class ListDimStylesTool
 {
     [McpServerTool(Name = "chamber19_list_dimstyles")]
-    [Description("Lists all dimension styles defined in the active AutoCAD drawing. Each entry has name, lineScale (Dimscale — overall dimension scale factor), and textHeight (Dimtxt — primary-units text height). Returns an empty dimStyles array when no drawing is open. Read-only; opens a database transaction.")]
+    [Description("Lists all dimension styles defined in the active AutoCAD drawing. Each entry has name, lineScale (Dimscale — overall dimension scale factor), and textHeight (Dimtxt — primary-units text height). Results are sorted by name (case-insensitive). Returns an empty dimStyles array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListDimStylesAsync()
     {
         var dimStyles = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadDimStyles);
@@ -67,7 +70,9 @@ public static class ListDimStylesTool
         }
         tx.Commit();
 
-        return result;
+        return result
+            .OrderBy(ds => ds.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <summary>

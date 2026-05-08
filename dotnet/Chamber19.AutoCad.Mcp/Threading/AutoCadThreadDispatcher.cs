@@ -23,11 +23,39 @@ namespace Chamber19.AutoCad.Mcp.Threading;
 /// </remarks>
 internal static class AutoCadThreadDispatcher
 {
+    /// <summary>Default upper bound on pending callbacks before <c>Enqueue</c> rejects new work.</summary>
+    public const int DefaultQueueCapacity = 32;
+
     private static readonly object SyncRoot = new();
     private static readonly Queue<PendingWork> Pending = new();
     private static int _applicationThreadId;
     private static bool _idleHandlerAttached;
     private static bool _initialized;
+    private static int _queueCapacity = DefaultQueueCapacity;
+
+    /// <summary>Current count of callbacks waiting to run on the AutoCAD application thread.</summary>
+    public static int QueueDepth
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return Pending.Count;
+            }
+        }
+    }
+
+    /// <summary>Maximum allowed queue depth; <c>Enqueue</c> throws when at or above this value.</summary>
+    public static int QueueCapacity
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return _queueCapacity;
+            }
+        }
+    }
 
     /// <summary>
     /// Captures the calling thread as the AutoCAD application thread and attaches the idle handler.
@@ -164,6 +192,7 @@ internal static class AutoCadThreadDispatcher
     private static void Enqueue(PendingWork work)
     {
         int depth;
+        int capacity;
         lock (SyncRoot)
         {
             if (!_initialized)
@@ -171,10 +200,68 @@ internal static class AutoCadThreadDispatcher
                 throw new InvalidOperationException(
                     "AutoCadThreadDispatcher is not initialized; ensure Extension.Initialize ran on the AutoCAD application thread.");
             }
+            if (Pending.Count >= _queueCapacity)
+            {
+                throw new InvalidOperationException(
+                    $"AutoCadThreadDispatcher queue is full ({Pending.Count}/{_queueCapacity}). Backpressure middleware should normally surface this as HTTP 429 before reaching the dispatcher.");
+            }
             Pending.Enqueue(work);
             depth = Pending.Count;
+            capacity = _queueCapacity;
         }
-        Log.Write($"[dispatcher] enqueued; queue depth={depth}");
+        Log.Write($"[dispatcher] enqueued; queue depth={depth}/{capacity}");
+    }
+
+    // Test-only surface. Production code MUST use Initialize/Shutdown only.
+
+    /// <summary>Test-only: capture the current thread as the application thread without
+    /// attaching the AutoCAD idle handler (which can't fire outside acad.exe). Use the
+    /// <c>EnqueueForTest</c> entry point to drive items through the queue logic.</summary>
+    internal static void InitializeForTest()
+    {
+        lock (SyncRoot)
+        {
+            if (_initialized)
+            {
+                return;
+            }
+            _applicationThreadId = Environment.CurrentManagedThreadId;
+            _initialized = true;
+        }
+    }
+
+    /// <summary>Test-only: clear all dispatcher state so tests are isolated.</summary>
+    internal static void ResetForTest()
+    {
+        lock (SyncRoot)
+        {
+            Pending.Clear();
+            _initialized = false;
+            _applicationThreadId = 0;
+            _idleHandlerAttached = false;
+            _queueCapacity = DefaultQueueCapacity;
+        }
+    }
+
+    /// <summary>Test-only: override the queue capacity so capacity behavior can be exercised
+    /// at small N without filling the default 32-deep queue.</summary>
+    internal static void SetQueueCapacityForTest(int capacity)
+    {
+        if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+        lock (SyncRoot)
+        {
+            _queueCapacity = capacity;
+        }
+    }
+
+    /// <summary>Test-only: directly enqueue a callback without going through
+    /// <see cref="InvokeOnApplicationThreadAsync(Action)"/>. Bypasses the
+    /// IsOnApplicationThread fast path so the queue cap can be exercised deterministically
+    /// from the test thread.</summary>
+    internal static void EnqueueForTest(Action callback)
+    {
+        if (callback is null) throw new ArgumentNullException(nameof(callback));
+        Enqueue(new PendingWork(callback, _ => { }));
     }
 
     private static void OnApplicationIdle(object? sender, EventArgs args)

@@ -29,7 +29,12 @@ internal sealed record BlockInstanceEntry(string Handle, IReadOnlyList<Attribute
 /// block name (case-insensitive), then iterate each instance's
 /// <see cref="BlockReference.AttributeCollection"/> and open each
 /// <see cref="AttributeReference"/> ForRead to capture <see cref="AttributeReference.Tag"/>
-/// and <see cref="AttributeReference.TextString"/>.
+/// and <see cref="AttributeReference.TextString"/>. Each instance is identified by its
+/// AutoCAD entity handle (hex string from <see cref="DBObject.Handle"/>), matching DXF
+/// group code 5 and the AutoLISP <c>(handent)</c> function.
+///
+/// Unlike <see cref="GetBlockAttributesTool"/> (which stops at the first match), this tool
+/// accumulates attributes for every matching instance in the drawing.
 ///
 /// All AutoCAD reads run on the application thread via
 /// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.

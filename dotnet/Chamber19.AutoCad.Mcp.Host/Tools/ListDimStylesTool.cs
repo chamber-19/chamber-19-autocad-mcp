@@ -30,6 +30,9 @@ internal sealed record DimStyleInfo(
 /// dimension scale factor (exposed as <c>lineScale</c>) and
 /// <see cref="DimStyleTableRecord.Dimtxt"/> is the primary-units text height.
 ///
+/// Results are sorted by <c>name</c> (case-insensitive, ordinal). This ordering is stable
+/// and guaranteed; clients may depend on it.
+///
 /// All AutoCAD reads run on the application thread via
 /// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>

@@ -31,6 +31,12 @@ internal sealed record AttributeEntry(string Tag, string Value);
 /// <see cref="AttributeReference"/> ForRead to capture <see cref="AttributeReference.Tag"/>
 /// and <see cref="AttributeReference.TextString"/>.
 ///
+/// <b>First-instance semantics:</b> "First" means the first <see cref="BlockReference"/>
+/// encountered while iterating layout BTRs in block-table iteration order (model space BTR is
+/// visited first, followed by paper-space BTRs in layout-tab order). If the same block is
+/// placed multiple times, only the first encountered instance's attributes are returned; all
+/// other instances are ignored.
+///
 /// All AutoCAD reads run on the application thread via
 /// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>

@@ -33,7 +33,7 @@ internal sealed record XrefInfo(
 /// <c>isAttached</c>: <c>true</c> = Attach mode, <c>false</c> = Overlay mode).
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class ListXrefsTool
@@ -42,7 +42,7 @@ public static class ListXrefsTool
     [Description("Lists external references (xrefs) in the active AutoCAD drawing. Each entry has name, path (as stored in the DWG), isLoaded (file resolved and loaded), and isAttached (true = Attach mode, false = Overlay mode). Returns an empty xrefs array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListXrefsAsync()
     {
-        var xrefs = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadXrefs);
+        var xrefs = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadXrefs);
         return Serialize(xrefs, DateTimeOffset.UtcNow);
     }
 

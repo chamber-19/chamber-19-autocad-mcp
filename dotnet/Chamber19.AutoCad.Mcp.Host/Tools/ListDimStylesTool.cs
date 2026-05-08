@@ -34,7 +34,7 @@ internal sealed record DimStyleInfo(
 /// and guaranteed; clients may depend on it.
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class ListDimStylesTool
@@ -43,7 +43,7 @@ public static class ListDimStylesTool
     [Description("Lists all dimension styles defined in the active AutoCAD drawing. Each entry has name, lineScale (Dimscale — overall dimension scale factor), and textHeight (Dimtxt — primary-units text height). Results are sorted by name (case-insensitive). Returns an empty dimStyles array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListDimStylesAsync()
     {
-        var dimStyles = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadDimStyles);
+        var dimStyles = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadDimStyles);
         return Serialize(dimStyles, DateTimeOffset.UtcNow);
     }
 

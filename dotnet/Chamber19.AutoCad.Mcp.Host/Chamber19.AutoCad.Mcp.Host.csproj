@@ -1,18 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Chamber19.AutoCad.Mcp</RootNamespace>
-    <AssemblyName>Chamber19.AutoCad.Mcp</AssemblyName>
+    <RootNamespace>Chamber19.AutoCad.Mcp.Host</RootNamespace>
+    <AssemblyName>Chamber19.AutoCad.Mcp.Host</AssemblyName>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <EnableDynamicLoading>true</EnableDynamicLoading>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Version>0.7.0</Version>
 
-    <!-- AutoCAD version & TFM resolution. Floor 2025+, primary 2027.
-         AutoCAD 2027 ships on .NET 10 (its managed DLLs link System.Runtime 10.0.0.0).
-         AutoCAD 2025/2026 ship on .NET 8. -->
     <AutoCadVersion Condition="'$(AutoCadVersion)' == ''">$([System.Environment]::GetEnvironmentVariable('AUTOCAD_VERSION'))</AutoCadVersion>
     <AutoCadVersion Condition="'$(AutoCadVersion)' == ''">2027</AutoCadVersion>
     <AutoCadTargetFramework Condition="'$(AutoCadTargetFramework)' == '' and $([MSBuild]::VersionGreaterThanOrEquals('$(AutoCadVersion)', '2027'))">net10.0-windows</AutoCadTargetFramework>
@@ -21,11 +18,9 @@
 
     <AutoCadInstallDir Condition="'$(AutoCadInstallDir)' == ''">$([System.Environment]::GetEnvironmentVariable('AUTOCAD_INSTALL_DIR'))</AutoCadInstallDir>
 
-    <!-- AutoCAD's managed DLLs mix legacy BCL versions; downgrade MSB3277 to a build message so a real regression stays visible. -->
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
-  <!-- Resolve AutoCAD install dir: explicit AutoCadInstallDir env var → AutoCadVersion-substituted path → 2027 → 2026 → 2025. -->
   <!-- Check both path separators: backslash for Windows, forward slash for Linux CI. -->
   <PropertyGroup Condition="'$(ResolvedAutoCadInstallDir)' == '' and '$(AutoCadInstallDir)' != '' and Exists('$(AutoCadInstallDir)\accoremgd.dll')">
     <ResolvedAutoCadInstallDir>$(AutoCadInstallDir)</ResolvedAutoCadInstallDir>
@@ -47,6 +42,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AutoCAD managed DLLs: compile-time reference only (Private=false).
+         At runtime the custom ALC falls back to the default ALC for AutoCAD assemblies
+         which are already loaded by acad.exe. -->
     <Reference Include="accoremgd">
       <HintPath>$(ResolvedAutoCadInstallDir)/accoremgd.dll</HintPath>
       <Private>false</Private>
@@ -64,7 +71,7 @@
   <Target Name="ValidateAutoCadManagedReferences" BeforeTargets="ResolveReferences">
     <Error
       Condition="'$(ResolvedAutoCadInstallDir)' == ''"
-      Text="Unable to locate AutoCAD managed DLLs. Set AUTOCAD_INSTALL_DIR (or AutoCadInstallDir) to your AutoCAD 2025+ install folder, e.g. C:\Program Files\Autodesk\AutoCAD 2027."
+      Text="Unable to locate AutoCAD managed DLLs. Set AUTOCAD_INSTALL_DIR (or AutoCadInstallDir) to your AutoCAD 2025+ install folder."
     />
     <Error
       Condition="!Exists('$(ResolvedAutoCadInstallDir)/accoremgd.dll')"
@@ -78,27 +85,29 @@
       Condition="!Exists('$(ResolvedAutoCadInstallDir)/acmgd.dll')"
       Text="Missing acmgd.dll under $(ResolvedAutoCadInstallDir)."
     />
-    <Message Importance="High" Text="Chamber19.AutoCad.Mcp using AutoCAD refs from: $(ResolvedAutoCadInstallDir)" />
-    <Message Importance="High" Text="Chamber19.AutoCad.Mcp target framework: $(TargetFramework) (override via /p:AutoCadTargetFramework=... or /p:AutoCadVersion=...)" />
+    <Message Importance="High" Text="Chamber19.AutoCad.Mcp.Host using AutoCAD refs from: $(ResolvedAutoCadInstallDir)" />
+    <Message Importance="High" Text="Chamber19.AutoCad.Mcp.Host target framework: $(TargetFramework)" />
   </Target>
 
-  <!-- Stage only the shell assembly into the bundle layout.
-       The host's StageBundleHost target places host DLLs into Contents/Win64/private/.
-       We do NOT RemoveDir the whole BundleStageDir here to avoid wiping private/. -->
-  <Target Name="StageBundle" AfterTargets="Build" Condition="'$(SkipBundleStage)' != 'true'">
+  <!-- Stage host DLLs into bundle private/ subdirectory. -->
+  <Target Name="StageBundleHost" AfterTargets="Build" Condition="'$(SkipBundleStage)' != 'true'">
     <PropertyGroup>
-      <BundleStageDir>$(MSBuildThisFileDirectory)..\..\bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\</BundleStageDir>
+      <BundlePrivateDir>$(MSBuildThisFileDirectory)..\..\bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\</BundlePrivateDir>
     </PropertyGroup>
     <ItemGroup>
-      <!-- Only the shell assembly and its metadata. Host DLLs are staged by StageBundleHost in private/. -->
-      <BundlePayload Include="$(OutDir)Chamber19.AutoCad.Mcp.dll" />
-      <BundlePayload Include="$(OutDir)Chamber19.AutoCad.Mcp.pdb" />
-      <BundlePayload Include="$(OutDir)Chamber19.AutoCad.Mcp.deps.json" />
-      <BundlePayload Include="$(OutDir)Chamber19.AutoCad.Mcp.runtimeconfig.json" />
+      <!-- Stage DLLs and deps.json for MCP SDK and host.
+           Exclude AutoCAD DLLs (Private=false so they won't be in OutDir anyway). -->
+      <HostPayload Include="$(OutDir)*.dll"
+                   Exclude="$(OutDir)accoremgd.dll;$(OutDir)acdbmgd.dll;$(OutDir)acmgd.dll" />
+      <HostPayload Include="$(OutDir)*.pdb"
+                   Exclude="$(OutDir)accoremgd.pdb;$(OutDir)acdbmgd.pdb;$(OutDir)acmgd.pdb" />
+      <!-- deps.json is required by AssemblyDependencyResolver. -->
+      <HostPayload Include="$(OutDir)*.deps.json" />
     </ItemGroup>
-    <MakeDir Directories="$(BundleStageDir)" />
-    <Copy SourceFiles="@(BundlePayload)" DestinationFolder="$(BundleStageDir)" SkipUnchangedFiles="true" />
-    <Message Importance="High" Text="Shell bundle staged at $(BundleStageDir)" />
+    <RemoveDir Directories="$(BundlePrivateDir)" />
+    <MakeDir Directories="$(BundlePrivateDir)" />
+    <Copy SourceFiles="@(HostPayload)" DestinationFolder="$(BundlePrivateDir)" SkipUnchangedFiles="true" />
+    <Message Importance="High" Text="Host bundle staged at $(BundlePrivateDir)" />
   </Target>
 
 </Project>

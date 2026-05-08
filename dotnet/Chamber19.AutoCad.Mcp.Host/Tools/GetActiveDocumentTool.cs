@@ -17,7 +17,7 @@ public static class GetActiveDocumentTool
     [Description("Returns metadata about the active AutoCAD drawing: document name, full file path, modified state, modelspace entity count, and current UTC timestamp. All AutoCAD reads dispatch onto the application thread via AutoCadThreadDispatcher.")]
     public static async Task<string> GetActiveDocumentAsync()
     {
-        var json = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(() =>
+        var json = await HostDispatcher.InvokeOnApplicationThreadAsync(() =>
         {
             var ts = DateTimeOffset.UtcNow.ToString("O");
             var doc = Application.DocumentManager.MdiActiveDocument;

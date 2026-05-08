@@ -15,7 +15,7 @@ public sealed class Extension : IExtensionApplication
         // Spec ordering: start the MCP host first, then attach the dispatcher's idle handler.
         // The brief race between host-listening and dispatcher-ready is accepted; in practice
         // no client races us in the few microseconds it takes.
-        McpServerHost.Start();
+        McpHostBootstrap.Start();
         AutoCadThreadDispatcher.Initialize();
     }
 
@@ -26,6 +26,6 @@ public sealed class Extension : IExtensionApplication
         // FIRST so any in-flight tool requests fault fast, then stop the host so Kestrel
         // drains its request pipeline.
         AutoCadThreadDispatcher.Shutdown();
-        McpServerHost.Stop();
+        McpHostBootstrap.Stop();
     }
 }

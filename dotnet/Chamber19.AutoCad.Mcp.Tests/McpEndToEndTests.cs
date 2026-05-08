@@ -43,7 +43,7 @@ public sealed class McpEndToEndTests
 {
     private const string ValidToken = "e2e-test-token-44-chars-padded-xxxxxxxxxxxx==";
 
-    // MapMcp() maps the MCP endpoint to /mcp by default.
+    // MCP endpoint is explicitly mounted at /mcp (SDK 1.3+ default is "" i.e. root).
     private const string McpPath = "/mcp";
 
     private static async Task<(IHost host, HttpClient client)> CreateMcpHostAsync(
@@ -62,7 +62,7 @@ public sealed class McpEndToEndTests
         var app = builder.Build();
         app.UseBearerAuth(ValidToken);
         app.UseBackpressure(() => queueDepth, () => queueCapacity);
-        app.MapMcp();
+        app.MapMcp("/mcp");
 
         await app.StartAsync(ct);
         return (app, app.GetTestClient());

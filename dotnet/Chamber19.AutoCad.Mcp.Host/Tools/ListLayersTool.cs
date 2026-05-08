@@ -30,7 +30,7 @@ internal sealed record LayerInfo(
 /// Iteration pattern lifted from <c>autocad-knowledge/layers.md</c>: open the LayerTable ForRead,
 /// iterate ObjectIds, open each LayerTableRecord ForRead, project to <see cref="LayerInfo"/>.
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class ListLayersTool
@@ -39,7 +39,7 @@ public static class ListLayersTool
     [Description("Lists all layers in the active AutoCAD drawing. Each entry has name, AutoCAD Color Index (ACI), and the frozen/locked/off/plottable flags. Returns an empty layers array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListLayersAsync()
     {
-        var layers = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadLayers);
+        var layers = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadLayers);
         return Serialize(layers, DateTimeOffset.UtcNow);
     }
 

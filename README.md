@@ -4,17 +4,11 @@ A C# AutoCAD .NET plugin that loads inside `acad.exe` and acts as an MCP server.
 
 This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our own MCP server inside acad.exe and expose our own tools.
 
-## Known limitations — read before installing
+## Coexistence with Autodesk's MCP bundle
 
-> **Autodesk's `AutoCAD-MCP-Server-2027.bundle` must be disabled before installing this plugin.** Both plugins ship the `ModelContextProtocol` C# SDK, both load into AutoCAD's default `AssemblyLoadContext`, and the version mismatch (Autodesk pins `0.4.0`, we use a current release) causes our plugin to fail at startup with a `TypeLoadException`. Until [issue #3 — ALC isolation for MCP SDK to coexist with Autodesk's acmcp.dll bundle](https://github.com/chamber-19/chamber-19-autocad-mcp/issues/3) is resolved, you must rename Autodesk's bundle folder before installing this one:
->
-> ```powershell
-> # Run from an elevated PowerShell. Reverse with the opposite rename.
-> Rename-Item "C:\Program Files\Autodesk\ApplicationPlugins\AutoCAD-MCP-Server-2027.bundle" `
->             "AutoCAD-MCP-Server-2027.bundle-disabled"
-> ```
->
-> Restart AutoCAD after renaming. Without this step, our plugin's `MCPSTATUS` will show `MCP server FAILED to start` and the HTTP server will not bind.
+This plugin loads the `ModelContextProtocol` SDK in its own private `AssemblyLoadContext` (`chamber19-mcp-host`), isolating it from Autodesk's `AutoCAD-MCP-Server-2027.bundle` which pins a different version of the same SDK in the default ALC. Both plugins can be installed simultaneously without version conflicts.
+
+`Chamber19.AutoCad.Mcp.Host.dll` and all MCP SDK dependencies live under `Contents/Win64/private/` inside the bundle. The shell (`Chamber19.AutoCad.Mcp.dll`) has zero `ModelContextProtocol.*` references and loads cleanly into the default ALC.
 
 ## Tool semantics
 
@@ -54,6 +48,8 @@ space BTRs first, then paper-space BTRs). Returns an empty `instances` array whe
 drawing is open, the block is not found, or no instances exist.
 
 ## Status
+
+**Commit 14 — ALC isolation.** Splits `Chamber19.AutoCad.Mcp.dll` (shell) from a new `Chamber19.AutoCad.Mcp.Host.dll` (host), loaded in a custom `AssemblyLoadContext` named `chamber19-mcp-host`. The shell has zero `ModelContextProtocol.*` references and stays in the default ALC. The host carries all MCP SDK code, Kestrel bootstrap, bearer auth, backpressure middleware, and all tools; its private deps live in `Contents/Win64/private/`. The shell's `McpHostBootstrap` owns port allocation, token generation, and the port file lifecycle; it calls the host via a reflection-only contract (`McpHostEntry.StartHost`/`StopHost`) whose parameters are all primitive/shared-runtime types. A `Func<Func<object?>, Task<object?>>` lambda bridges `AutoCadThreadDispatcher` across the ALC boundary without sharing any SDK types. 59 tests continue to pass.
 
 **Commit 13 — `chamber19_enumerate_block_attributes`.** Complements the existing `chamber19_get_block_attributes` by returning attributes for **every** placed instance of a named block. Walks all layout BTRs (model space + paper spaces) inside a read-only Transaction, resolves each `BlockReference` via `DynamicBlockTableRecord` (case-insensitive), and collects the `AttributeCollection` from every matching instance. Each instance is identified by its AutoCAD entity handle (hex string). Returns `{instances: [{handle, attributes: [{tag, value}]}], ts}`. Returns an empty `instances` array when no drawing is open, the block is not found, or no instances have attributes. Pattern from `autocad-knowledge/attributes.md` "Finding all instances of a named block". 4 new tests in `EnumerateBlockAttributesToolTests`; 59 tests total.
 
@@ -116,12 +112,23 @@ Chamber19.AutoCad.Mcp.sln              Solution
 Directory.Build.props                  Cross-platform restore guard
 dotnet/
   Directory.Build.props                Shared C# settings
-  Chamber19.AutoCad.Mcp/               Main plugin
+  Chamber19.AutoCad.Mcp/               Shell plugin (default ALC, zero MCP SDK refs)
     Chamber19.AutoCad.Mcp.csproj
     Extension.cs                       IExtensionApplication shell
     Commands.cs                        MCPSTATUS command
+    Alc/McpHostLoadContext.cs          Custom AssemblyLoadContext for host isolation
+    Hosting/McpHostBootstrap.cs        Port allocation, token, port file, host launch
+  Chamber19.AutoCad.Mcp.Host/          Host (private ALC, owns all MCP SDK code)
+    Chamber19.AutoCad.Mcp.Host.csproj
+    McpHostEntry.cs                    Public reflection entry point (StartHost/StopHost)
+    Hosting/McpServerHost.cs           Kestrel bootstrap, BearerAuth, Backpressure
+    Threading/HostDispatcher.cs        Cross-ALC dispatcher bridge
+    Tools/                             All MCP tool implementations
+  Chamber19.AutoCad.Mcp.Tests/         xUnit v3 test harness (59 tests)
 bundle/
-  Chamber19.AutoCad.Mcp.bundle/        PackageContents.xml + staged DLLs (Contents/Win64/, regenerated by build)
+  Chamber19.AutoCad.Mcp.bundle/        PackageContents.xml + staged DLLs
+    Contents/Win64/                    Shell DLL staged here
+    Contents/Win64/private/            Host DLL + MCP SDK deps staged here
 tools/
   install-bundle.ps1                   Stages bundle into %APPDATA%\Autodesk\ApplicationPlugins\
 spikes/

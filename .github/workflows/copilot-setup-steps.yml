@@ -1,0 +1,43 @@
+name: "Copilot Setup Steps"
+
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+    pull_request:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+    copilot-setup-steps:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Build AutoCAD stub DLLs
+              run: |
+                  dotnet build dotnet/AutoCad.Stubs/acdbmgd/acdbmgd.csproj -c Release --nologo -v minimal
+                  dotnet build dotnet/AutoCad.Stubs/acmgd/acmgd.csproj -c Release --nologo -v minimal
+                  dotnet build dotnet/AutoCad.Stubs/accoremgd/accoremgd.csproj -c Release --nologo -v minimal
+
+            - name: Expose AutoCAD stub path and skip bundle stage
+              run: |
+                  echo "AUTOCAD_INSTALL_DIR=$GITHUB_WORKSPACE/dotnet/AutoCad.Stubs/output" >> "$GITHUB_ENV"
+                  echo "SkipBundleStage=true" >> "$GITHUB_ENV"
+
+            - name: Restore NuGet packages
+              run: dotnet restore Chamber19.AutoCad.Mcp.sln
+
+            - name: Build solution
+              run: dotnet build Chamber19.AutoCad.Mcp.sln -c Release --no-restore --nologo

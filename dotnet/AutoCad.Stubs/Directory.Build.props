@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Stub projects are a CI build tool; they must NOT inherit TreatWarningsAsErrors=true
+    from dotnet/Directory.Build.props because the stubs intentionally omit full
+    implementations. We replicate only the properties the stubs need.
+  -->
+  <PropertyGroup>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

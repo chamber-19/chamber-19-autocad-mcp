@@ -29,15 +29,15 @@ internal sealed record BlockInstanceEntry(string Handle, IReadOnlyList<Attribute
 /// block name (case-insensitive), then iterate each instance's
 /// <see cref="BlockReference.AttributeCollection"/> and open each
 /// <see cref="AttributeReference"/> ForRead to capture <see cref="AttributeReference.Tag"/>
-/// and <see cref="AttributeReference.TextString"/>.
+/// and <see cref="AttributeReference.TextString"/>. Each instance is identified by its
+/// AutoCAD entity handle (hex string from <see cref="DBObject.Handle"/>), matching DXF
+/// group code 5 and the AutoLISP <c>(handent)</c> function.
 ///
-/// Unlike <see cref="GetBlockAttributesTool"/> (which stops at the first match),
-/// this tool accumulates all matching instances. Each instance is identified by its
-/// AutoCAD entity <see cref="Entity.Handle"/> (hex string), matching the handle
-/// used in DXF group code 5 and the AutoLISP <c>(handent)</c> function.
+/// Unlike <see cref="GetBlockAttributesTool"/> (which stops at the first match), this tool
+/// accumulates attributes for every matching instance in the drawing.
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class EnumerateBlockAttributesTool
@@ -48,7 +48,7 @@ public static class EnumerateBlockAttributesTool
         [Description("Name of the block definition to query (case-insensitive).")]
         string blockName)
     {
-        var instances = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(
+        var instances = await HostDispatcher.InvokeOnApplicationThreadAsync(
             () => ReadAllInstances(blockName));
         return Serialize(instances, DateTimeOffset.UtcNow);
     }
@@ -67,7 +67,6 @@ public static class EnumerateBlockAttributesTool
 
         var result = new List<BlockInstanceEntry>();
 
-        // Walk every layout BTR (model space + paper spaces) collecting all matching instances.
         foreach (ObjectId btrId in blockTable)
         {
             var layoutBtr = (BlockTableRecord)tx.GetObject(btrId, OpenMode.ForRead);
@@ -84,15 +83,12 @@ public static class EnumerateBlockAttributesTool
                     continue;
                 }
 
-                // Resolve via DynamicBlockTableRecord so dynamic-block customized variants
-                // match against the original definition name rather than their *U anonymous name.
                 var effective = (BlockTableRecord)tx.GetObject(bref.DynamicBlockTableRecord, OpenMode.ForRead);
                 if (!effective.Name.Equals(blockName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                // Collect attributes for this instance.
                 var attributes = new List<AttributeEntry>();
                 foreach (ObjectId attId in bref.AttributeCollection)
                 {

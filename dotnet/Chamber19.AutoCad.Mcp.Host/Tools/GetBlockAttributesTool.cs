@@ -13,7 +13,8 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 namespace Chamber19.AutoCad.Mcp.Tools;
 
 /// <summary>
-/// Per-attribute snapshot returned by <see cref="GetBlockAttributesTool"/>.
+/// Per-attribute snapshot used by <see cref="GetBlockAttributesTool"/> and
+/// <see cref="EnumerateBlockAttributesTool"/>.
 /// </summary>
 internal sealed record AttributeEntry(string Tag, string Value);
 
@@ -37,7 +38,7 @@ internal sealed record AttributeEntry(string Tag, string Value);
 /// other instances are ignored.
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class GetBlockAttributesTool
@@ -48,7 +49,7 @@ public static class GetBlockAttributesTool
         [Description("Name of the block definition to query (case-insensitive).")]
         string blockName)
     {
-        var attributes = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(
+        var attributes = await HostDispatcher.InvokeOnApplicationThreadAsync(
             () => ReadAttributes(blockName));
         return Serialize(attributes, DateTimeOffset.UtcNow);
     }
@@ -83,15 +84,12 @@ public static class GetBlockAttributesTool
                     continue;
                 }
 
-                // Resolve via DynamicBlockTableRecord so dynamic-block customized variants
-                // match against the original definition name rather than their *U anonymous name.
                 var effective = (BlockTableRecord)tx.GetObject(bref.DynamicBlockTableRecord, OpenMode.ForRead);
                 if (!effective.Name.Equals(blockName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                // Found the first matching instance — collect its AttributeReferences.
                 var result = new List<AttributeEntry>();
                 foreach (ObjectId attId in bref.AttributeCollection)
                 {

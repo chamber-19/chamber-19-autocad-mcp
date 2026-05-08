@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>acdbmgd</AssemblyName>
+    <RootNamespace>AutoCad.Stubs</RootNamespace>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Version>26.0.0.0</Version>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

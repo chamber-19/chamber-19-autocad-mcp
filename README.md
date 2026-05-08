@@ -14,6 +14,23 @@ This plugin loads the `ModelContextProtocol` SDK in its own private `AssemblyLoa
 
 Important behavioral contracts that clients must understand:
 
+### `chamber19_polyline_length_by_layer` — current-space only
+
+`Editor.SelectAll` operates on the **current space** only.
+
+| TILEMODE value | "Current space" |
+|---|---|
+| `1` (default, tiled viewports) | Model space |
+| `0` (paper space active) | Active paper space tab |
+
+Polylines on the queried layer that live in a *different* space are **not** included in the
+returned totals. To measure polylines across all spaces, activate each space in turn and call
+the tool again.
+
+Both open and closed polylines are included. `totalLength` reports the full perimeter for closed
+polylines (the closing segment is part of `Length`). Includes both `LWPOLYLINE` and `POLYLINE`
+entity types (the latter covers legacy 2-D and 3-D polylines). `totalLength` is in drawing units.
+
 ### `chamber19_count_entities_by_layer` — current-space only
 
 `Editor.SelectAll` operates on the **current space** only.
@@ -48,6 +65,8 @@ space BTRs first, then paper-space BTRs). Returns an empty `instances` array whe
 drawing is open, the block is not found, or no instances exist.
 
 ## Status
+
+**Commit 15 — `chamber19_polyline_length_by_layer`.** Sums total polyline length for a named layer in the active drawing. Uses a `SelectionFilter` combining `DxfCode.LayerName` with an OR-group for `LWPOLYLINE` and `POLYLINE` entity types applied via `Editor.SelectAll`. Matched entities are opened ForRead inside a read-only transaction; the `.Length` property is summed via defensive switch-cast over `Polyline`, `Polyline2d`, and `Polyline3d` (unexpected types skipped). Searches the current space (model space when `TILEMODE=1`, active paper space otherwise); layer name matching is case-insensitive. Both open and closed polylines are included; `totalLength` is the full perimeter for closed polylines. Returns `{totalLength, polylineCount, ts}` where both are 0 when no drawing is open, the layer does not exist, or no polylines reside on it. Pattern documented in the new `autocad-knowledge/polylines.md`. 4 new tests in `PolylineLengthByLayerToolTests`; 63 tests total.
 
 **Commit 14 — ALC isolation.** Splits `Chamber19.AutoCad.Mcp.dll` (shell) from a new `Chamber19.AutoCad.Mcp.Host.dll` (host), loaded in a custom `AssemblyLoadContext` named `chamber19-mcp-host`. The shell has zero `ModelContextProtocol.*` references and stays in the default ALC. The host carries all MCP SDK code, Kestrel bootstrap, bearer auth, backpressure middleware, and all tools; its private deps live in `Contents/Win64/private/`. The shell's `McpHostBootstrap` owns port allocation, token generation, and the port file lifecycle; it calls the host via a reflection-only contract (`McpHostEntry.StartHost`/`StopHost`) whose parameters are all primitive/shared-runtime types. A `Func<Func<object?>, Task<object?>>` lambda bridges `AutoCadThreadDispatcher` across the ALC boundary without sharing any SDK types. 59 tests continue to pass.
 
@@ -124,7 +143,7 @@ dotnet/
     Hosting/McpServerHost.cs           Kestrel bootstrap, BearerAuth, Backpressure
     Threading/HostDispatcher.cs        Cross-ALC dispatcher bridge
     Tools/                             All MCP tool implementations
-  Chamber19.AutoCad.Mcp.Tests/         xUnit v3 test harness (59 tests)
+  Chamber19.AutoCad.Mcp.Tests/         xUnit v3 test harness (63 tests)
 bundle/
   Chamber19.AutoCad.Mcp.bundle/        PackageContents.xml + staged DLLs
     Contents/Win64/                    Shell DLL staged here

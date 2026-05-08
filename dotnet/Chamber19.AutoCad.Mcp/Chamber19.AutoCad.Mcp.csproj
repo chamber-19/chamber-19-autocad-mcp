@@ -8,7 +8,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
 
     <!-- AutoCAD version & TFM resolution. Floor 2025+, primary 2027.
          AutoCAD 2027 ships on .NET 10 (its managed DLLs link System.Runtime 10.0.0.0).

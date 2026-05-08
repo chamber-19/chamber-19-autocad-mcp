@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Chamber19.AutoCad.Mcp.Tests</RootNamespace>
+    <AssemblyName>Chamber19.AutoCad.Mcp.Tests</AssemblyName>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Tests reference internal types via InternalsVisibleTo, so they need access to
+         AutoCAD-referencing assemblies. We don't reference accoremgd/acdbmgd directly,
+         but the plugin project does, and its build will run as a transitive dependency. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Chamber19.AutoCad.Mcp\Chamber19.AutoCad.Mcp.csproj" />
+  </ItemGroup>
+
+</Project>

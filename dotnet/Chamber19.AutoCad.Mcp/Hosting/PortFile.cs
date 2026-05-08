@@ -15,9 +15,16 @@ internal static class PortFile
         WriteIndented = false,
     };
 
-    public static void Write(string url, string token, int pid, DateTimeOffset started)
+    public static void Write(string url, string token, int pid, DateTimeOffset started) =>
+        Write(Path, url, token, pid, started);
+
+    public static void Delete() => Delete(Path);
+
+    // Path-parameterized overloads exist so tests can target a temp directory instead of the
+    // canonical %LOCALAPPDATA% path. Public Write/Delete delegate here.
+    internal static void Write(string targetPath, string url, string token, int pid, DateTimeOffset started)
     {
-        var directory = System.IO.Path.GetDirectoryName(Path)!;
+        var directory = System.IO.Path.GetDirectoryName(targetPath)!;
         Directory.CreateDirectory(directory);
 
         var payload = new
@@ -29,18 +36,18 @@ internal static class PortFile
         };
 
         var json = JsonSerializer.Serialize(payload, SerializerOptions);
-        var temp = Path + ".tmp";
+        var temp = targetPath + ".tmp";
         File.WriteAllText(temp, json);
-        File.Move(temp, Path, overwrite: true);
+        File.Move(temp, targetPath, overwrite: true);
     }
 
-    public static void Delete()
+    internal static void Delete(string targetPath)
     {
         try
         {
-            if (File.Exists(Path))
+            if (File.Exists(targetPath))
             {
-                File.Delete(Path);
+                File.Delete(targetPath);
             }
         }
         catch

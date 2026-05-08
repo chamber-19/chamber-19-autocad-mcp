@@ -18,7 +18,9 @@ This is **not** a wrapper around Autodesk's internal `acmcp.dll`. We host our ow
 
 ## Status
 
-**Commit 3 — AutoCAD-thread dispatcher and first database-reading tool.** Adds `AutoCadThreadDispatcher` in `Threading/`, lifted from Suite's `SuiteCadPipeHost.InvokeOnApplicationThread` pattern: captures the AutoCAD application thread id during `Initialize`, attaches `Application.Idle` handler, queues callbacks from background threads (Kestrel) and runs them on the UI thread on the next idle tick. Async API: `Task InvokeOnApplicationThreadAsync(Action)` and `Task<T> InvokeOnApplicationThreadAsync<T>(Func<T>)`. The first tool that exercises the dispatcher is `chamber19_get_active_document`, returning `{name, path, isModified, ts}`. Builds on commit 2's MCP host (`chamber19_ping`, port file, bearer auth, RFC 6750 401).
+**Commit 4 — test harness.** Adds `dotnet/Chamber19.AutoCad.Mcp.Tests/` (xUnit v3, `net10.0-windows`) with tests for the existing low-level pieces: `BearerAuth` middleware (missing token / invalid token / valid token / empty bearer all assert correct status + RFC 6750 `WWW-Authenticate` header + JSON body), `PortFile.Write` (atomic temp-then-move, JSON shape, parent-dir creation, overwrite, idempotent delete), and `PortAllocator.FindFreePort` (returns a port in 5001–5050; skips an already-bound port). Establishes the harness; future tools land their tests here. Run via `dotnet test`.
+
+**Commit 3 — AutoCAD-thread dispatcher and first database-reading tool.** Adds `AutoCadThreadDispatcher` in `Threading/`, lifted from Suite's `SuiteCadPipeHost.InvokeOnApplicationThread` pattern: captures the AutoCAD application thread id during `Initialize`, attaches `Application.Idle` handler, queues callbacks from background threads (Kestrel) and runs them on the UI thread on the next idle tick. Async API: `Task InvokeOnApplicationThreadAsync(Action)` and `Task<T> InvokeOnApplicationThreadAsync<T>(Func<T>)`. The first tool that exercises the dispatcher is `chamber19_get_active_document`, returning `{name, path, isModified, modelSpaceEntityCount, ts}`. Builds on commit 2's MCP host (`chamber19_ping`, port file, bearer auth, RFC 6750 401).
 
 ## Requirements
 
@@ -36,6 +38,9 @@ dotnet build .\Chamber19.AutoCad.Mcp.sln -c Release /p:AutoCadVersion=2026
 
 # Install bundle into %APPDATA%\Autodesk\ApplicationPlugins\ for production-style loading
 .\tools\install-bundle.ps1
+
+# Run the test suite (xUnit v3, no AutoCAD required)
+dotnet test .\Chamber19.AutoCad.Mcp.sln -c Release
 
 # Dev iteration: launch AutoCAD, then NETLOAD this DLL directly:
 #   .\dotnet\Chamber19.AutoCad.Mcp\bin\Release\net10.0-windows\Chamber19.AutoCad.Mcp.dll

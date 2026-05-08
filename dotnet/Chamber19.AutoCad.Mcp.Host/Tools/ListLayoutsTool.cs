@@ -31,7 +31,7 @@ internal sealed record LayoutInfo(
 /// <see cref="LayoutManager.Current"/>.
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class ListLayoutsTool
@@ -40,7 +40,7 @@ public static class ListLayoutsTool
     [Description("Lists all layout tabs in the active AutoCAD drawing. Each entry has name, isCurrent (true for the active tab), and tabOrder (0 = Model, 1+ = paper-space tabs in left-to-right order). Returns an empty layouts array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListLayoutsAsync()
     {
-        var layouts = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadLayouts);
+        var layouts = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadLayouts);
         return Serialize(layouts, DateTimeOffset.UtcNow);
     }
 

@@ -10,6 +10,9 @@ out/
 *.njsproj
 *.sln.docstates
 
+# AutoCAD CI stub DLL output — regenerated on every build
+dotnet/AutoCad.Stubs/output/
+
 # Bundle staging — regenerated on every build
 bundle/Chamber19.AutoCad.Mcp.bundle/Contents/
 

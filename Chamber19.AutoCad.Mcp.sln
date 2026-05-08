@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{71E6E7
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chamber19.AutoCad.Mcp.Tests", "dotnet\Chamber19.AutoCad.Mcp.Tests\Chamber19.AutoCad.Mcp.Tests.csproj", "{5B135467-4A47-405B-8B7C-E909ADB75651}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chamber19.AutoCad.Mcp.Host", "dotnet\Chamber19.AutoCad.Mcp.Host\Chamber19.AutoCad.Mcp.Host.csproj", "{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,11 +45,24 @@ Global
 		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x64.Build.0 = Release|Any CPU
 		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x86.ActiveCfg = Release|Any CPU
 		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x86.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x64.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x64.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x64.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5B135467-4A47-405B-8B7C-E909ADB75651} = {71E6E750-85FD-B5BC-4321-E01377EC6231}
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67} = {71E6E750-85FD-B5BC-4321-E01377EC6231}
 	EndGlobalSection
 EndGlobal

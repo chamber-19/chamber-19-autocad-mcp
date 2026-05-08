@@ -33,7 +33,7 @@ internal sealed record BlockInfo(
 /// count against the original definition rather than its anonymous customized variants.
 ///
 /// All AutoCAD reads run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class ListBlocksTool
@@ -42,7 +42,7 @@ public static class ListBlocksTool
     [Description("Lists user-defined block definitions in the active AutoCAD drawing. Each entry has name, reference count (how many BlockReferences in model space + paper spaces resolve to this definition), and isDynamic flag. Anonymous (*U/*X/*D) and layout BTRs are excluded. Returns an empty blocks array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListBlocksAsync()
     {
-        var blocks = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(ReadBlocks);
+        var blocks = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadBlocks);
         return Serialize(blocks, DateTimeOffset.UtcNow);
     }
 

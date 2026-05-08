@@ -18,19 +18,9 @@ namespace Chamber19.AutoCad.Mcp.Tools;
 /// Filter pattern from <c>autocad-knowledge/selection_sets.md</c>: construct a
 /// <see cref="SelectionFilter"/> with a single <see cref="DxfCode.LayerName"/> TypedValue and
 /// call <see cref="Editor.SelectAll(SelectionFilter)"/> to count entities in the current space.
-/// Layer name matching is case-insensitive in AutoCAD's selection engine.
-///
-/// <b>Current-space semantics:</b> <see cref="Editor.SelectAll"/> searches only the current
-/// space — model space when <c>TILEMODE=1</c>, active paper space when <c>TILEMODE=0</c>.
-/// Entities on the same layer that exist in a different space are <b>not</b> included in the
-/// returned count. To count entities in all spaces, switch to each space and call the tool
-/// again.
 ///
 /// All AutoCAD interactions run on the application thread via
-/// <see cref="AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
-///
-/// On large drawings the selection can be slow; the HTTP backpressure middleware limits
-/// concurrent queue depth so burst requests are shed with 429 before they accumulate.
+/// <see cref="HostDispatcher.InvokeOnApplicationThreadAsync{T}"/>.
 /// </remarks>
 [McpServerToolType]
 public static class CountEntitiesByLayerTool
@@ -41,7 +31,7 @@ public static class CountEntitiesByLayerTool
         [Description("Name of the layer to count entities on (case-insensitive).")]
         string layerName)
     {
-        var count = await AutoCadThreadDispatcher.InvokeOnApplicationThreadAsync(
+        var count = await HostDispatcher.InvokeOnApplicationThreadAsync(
             () => CountEntities(layerName));
         return Serialize(count, DateTimeOffset.UtcNow);
     }

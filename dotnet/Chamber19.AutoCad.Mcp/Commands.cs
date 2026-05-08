@@ -18,7 +18,7 @@ public sealed class Commands
             return;
         }
 
-        var status = McpServerHost.GetStatus();
+        var status = McpHostBootstrap.GetStatus();
 
         if (status.Running)
         {

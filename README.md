@@ -19,7 +19,7 @@ Important behavioral contracts that clients must understand:
 `Editor.SelectAll` operates on the **current space** only.
 
 | TILEMODE value | "Current space" |
-|---|---|
+| --- | --- |
 | `1` (default, tiled viewports) | Model space |
 | `0` (paper space active) | Active paper space tab |
 
@@ -31,12 +31,24 @@ Both open and closed polylines are included. `totalLength` reports the full peri
 polylines (the closing segment is part of `Length`). Includes both `LWPOLYLINE` and `POLYLINE`
 entity types (the latter covers legacy 2-D and 3-D polylines). `totalLength` is in drawing units.
 
+### `chamber19_closed_polyline_area_by_layer` — closed-only, `Math.Abs(area)`
+
+Uses the same current-space `SelectAll` semantics as `chamber19_polyline_length_by_layer`
+(model space when `TILEMODE=1`, active paper-space tab when `TILEMODE=0`).
+
+Only `Polyline` entities where `Closed == true` are counted. Each contributing area uses
+`Math.Abs(Polyline.Area)`, so clockwise and counter-clockwise winding directions normalize to
+the same positive enclosed area. Open polylines are excluded.
+
+Returns `{totalArea, polylineCount, ts}` with zeros when no drawing is open, no matching layer
+content exists in the current space, or no closed polylines qualify.
+
 ### `chamber19_count_entities_by_layer` — current-space only
 
 `Editor.SelectAll` operates on the **current space** only.
 
 | TILEMODE value | "Current space" |
-|---|---|
+| --- | --- |
 | `1` (default, tiled viewports) | Model space |
 | `0` (paper space active) | Active paper space tab |
 
@@ -64,7 +76,60 @@ AutoLISP `(handent)` function). Instances are returned in block-table walk order
 space BTRs first, then paper-space BTRs). Returns an empty `instances` array when no
 drawing is open, the block is not found, or no instances exist.
 
+### `chamber19_text_enumeration_by_layer` — `value` vs `plainValue`
+
+Enumerates text entities in the current space on the requested layer (case-insensitive), covering
+both `DBText` and `MText`, sorted by handle (case-insensitive hex comparison).
+
+- `DBText`: `value = TextString`, `plainValue = TextString`, `position = Position`
+- `MText`: `value = Contents` (formatting codes preserved), `plainValue = Text` (display text),
+  `position = Location`
+
+Returns `{texts:[{handle, kind, value, plainValue, position:{x,y,z}}], ts}`.
+
+### `chamber19_find_blocks_by_layout` — layout-scoped block discovery
+
+Matches `layoutName` case-insensitively against `Layout.LayoutName`.
+
+- If missing: `{layoutFound:false, blocks:[], ts}`
+- If found: walks only that layout's BTR, returns block references sorted by handle as
+  `{name, handle, position}`
+
+`name` resolves through `DynamicBlockTableRecord`, so dynamic block insertions report effective
+definition names instead of anonymous variants.
+
+### `chamber19_enumerate_attribute_values_by_tag` — global tag audit
+
+Walks all layout BTRs (model + paper spaces), all `BlockReference` entities, and each
+`AttributeCollection`, matching `tag` case-insensitively.
+
+Returns `{matches:[{blockName, handle, value}], ts}` where:
+
+- `blockName` is the effective definition name via `DynamicBlockTableRecord`
+- `handle` is the `AttributeReference` handle (not the parent block handle)
+
+Results are sorted by handle.
+
+### `chamber19_get_block_by_handle` — safe handle lookup
+
+Input handle is parsed as hexadecimal (DXF group code 5 semantics) and resolved via
+`Database.GetObjectId(false, new Handle(parsedHex), 0)`.
+
+Returns `{found:false, ts}` for all expected failure branches without throwing:
+
+- malformed hex
+- non-resolving handle
+- resolved object is not a `BlockReference`
+
+When found, returns `{found:true, blockName, position, attributes, ts}` where `blockName`
+resolves through `DynamicBlockTableRecord` and `attributes` is `[{tag, value}]` from the block's
+`AttributeCollection`.
+
 ## Status
+
+**Commit 17 — docs/manual pass + markdown normalization.** Added `USER_MANUAL.md` with end-to-end operator guidance (build, install, load/verify, discovery, smoke test, authenticated MCP calls, troubleshooting). Applied Markdown-style normalization across `README.md` and `autocad-knowledge/*.md` updates (table separator spacing, fenced-code language tags, list spacing) and validated with zero markdown diagnostics in changed docs.
+
+**Commit 16 — new read-only tools + AutoCAD 2027 xref API alignment.** Added five tools: `chamber19_closed_polyline_area_by_layer`, `chamber19_text_enumeration_by_layer`, `chamber19_find_blocks_by_layout`, `chamber19_enumerate_attribute_values_by_tag`, and `chamber19_get_block_by_handle` (plus shared `Coordinate3` DTO). Added matching serializer-focused unit tests and expanded knowledge docs (`autocad-knowledge/polylines.md`, `autocad-knowledge/text.md`, `autocad-knowledge/layouts.md`, `autocad-knowledge/attributes.md`) and semantic contracts in `README.md`. Aligned xref reads to actual AutoCAD 2027 managed API (`GetHostDwgXrefGraph(true)`, `XrefStatus == Resolved`) and updated stubs and xref docs accordingly. Full suite passes: 94 tests total.
 
 **Commit 15 — `chamber19_polyline_length_by_layer`.** Sums total polyline length for a named layer in the active drawing. Uses a `SelectionFilter` combining `DxfCode.LayerName` with an OR-group for `LWPOLYLINE` and `POLYLINE` entity types applied via `Editor.SelectAll`. Matched entities are opened ForRead inside a read-only transaction; the `.Length` property is summed via defensive switch-cast over `Polyline`, `Polyline2d`, and `Polyline3d` (unexpected types skipped). Searches the current space (model space when `TILEMODE=1`, active paper space otherwise); layer name matching is case-insensitive. Both open and closed polylines are included; `totalLength` is the full perimeter for closed polylines. Returns `{totalLength, polylineCount, ts}` where both are 0 when no drawing is open, the layer does not exist, or no polylines reside on it. Pattern documented in the new `autocad-knowledge/polylines.md`. 4 new tests in `PolylineLengthByLayerToolTests`; 63 tests total.
 
@@ -121,12 +186,13 @@ In AutoCAD, run `MCPSTATUS` to confirm the plugin is loaded.
 ## How it loads
 
 The bundle ships with `LoadOnAutoCADStartup="false"` and `LoadOnRequest="true"` in `PackageContents.xml`. The plugin loads when:
+
 - An `MCP*` command is invoked, or
 - An engineer manually `NETLOAD`s the DLL (dev workflow).
 
 ## Repo layout
 
-```
+```text
 Chamber19.AutoCad.Mcp.sln              Solution
 Directory.Build.props                  Cross-platform restore guard
 dotnet/
@@ -143,7 +209,7 @@ dotnet/
     Hosting/McpServerHost.cs           Kestrel bootstrap, BearerAuth, Backpressure
     Threading/HostDispatcher.cs        Cross-ALC dispatcher bridge
     Tools/                             All MCP tool implementations
-  Chamber19.AutoCad.Mcp.Tests/         xUnit v3 test harness (63 tests)
+  Chamber19.AutoCad.Mcp.Tests/         xUnit v3 test harness (94 tests)
 bundle/
   Chamber19.AutoCad.Mcp.bundle/        PackageContents.xml + staged DLLs
     Contents/Win64/                    Shell DLL staged here

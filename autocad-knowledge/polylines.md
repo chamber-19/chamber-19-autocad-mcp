@@ -14,7 +14,7 @@ using Autodesk.AutoCAD.EditorInput;      // Editor, SelectionResult, PromptStatu
 AutoCAD has three polyline classes in the .NET API:
 
 | DXF entity type | .NET class | Description |
-|---|---|---|
+| --- | --- | --- |
 | `LWPOLYLINE` | `Autodesk.AutoCAD.DatabaseServices.Polyline` | Lightweight 2-D polyline (most common in modern drawings) |
 | `POLYLINE` | `Autodesk.AutoCAD.DatabaseServices.Polyline2d` | Legacy 2-D polyline (older DWG format) |
 | `POLYLINE` | `Autodesk.AutoCAD.DatabaseServices.Polyline3d` | 3-D polyline |
@@ -86,12 +86,41 @@ property behaves identically for both:
 There is no flag to exclude one or the other via the selection filter; if you need to separate
 them, inspect `Polyline.Closed` / `Polyline2d.Closed` after opening the entity.
 
+## Summing enclosed area for closed polylines
+
+To compute enclosed area by layer (current-space only), use the same selection filter pattern,
+then include only lightweight polylines where `Closed == true`:
+
+```csharp
+double totalArea = 0.0;
+int polylineCount = 0;
+
+using var tx = doc.Database.TransactionManager.StartTransaction();
+foreach (var objId in result.Value.GetObjectIds())
+{
+    var entity = tx.GetObject(objId, OpenMode.ForRead);
+    if (entity is Polyline pl && pl.Closed)
+    {
+        // Normalize winding direction: clockwise areas may be negative.
+        totalArea += Math.Abs(pl.Area);
+        polylineCount++;
+    }
+}
+tx.Commit();
+```
+
+Why `Math.Abs(pl.Area)` matters:
+
+- AutoCAD area sign depends on vertex winding direction.
+- Counter-clockwise and clockwise versions of the same boundary can produce opposite signs.
+- `Math.Abs(...)` normalizes both to positive enclosed area for stable client semantics.
+
 ## Current-space semantics
 
 `Editor.SelectAll` operates on the **current space** only:
 
 | TILEMODE value | "Current space" |
-|---|---|
+| --- | --- |
 | `1` (default, tiled viewports) | Model space |
 | `0` (paper space active) | Active paper space tab |
 

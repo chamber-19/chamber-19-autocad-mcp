@@ -26,9 +26,10 @@ internal sealed record XrefInfo(
 /// </summary>
 /// <remarks>
 /// API pattern from <c>autocad-knowledge/xrefs.md</c>: iterate
-/// <see cref="Database.XrefBlockTableRecordIds"/> inside a read-only transaction,
-/// open each <see cref="BlockTableRecord"/> ForRead, and inspect
-/// <see cref="BlockTableRecord.IsLoaded"/>, <see cref="BlockTableRecord.PathName"/>,
+/// <see cref="Database.GetHostDwgXrefGraph(bool)"/> inside a read-only transaction,
+/// iterate graph nodes (skipping the root host drawing node), open each
+/// <see cref="BlockTableRecord"/> ForRead, and inspect
+/// <see cref="BlockTableRecord.XrefStatus"/>, <see cref="BlockTableRecord.PathName"/>,
 /// and <see cref="BlockTableRecord.IsFromOverlayReference"/> (used to derive
 /// <c>isAttached</c>: <c>true</c> = Attach mode, <c>false</c> = Overlay mode).
 ///
@@ -39,7 +40,7 @@ internal sealed record XrefInfo(
 public static class ListXrefsTool
 {
     [McpServerTool(Name = "chamber19_list_xrefs")]
-    [Description("Lists external references (xrefs) in the active AutoCAD drawing. Each entry has name, path (as stored in the DWG), isLoaded (file resolved and loaded), and isAttached (true = Attach mode, false = Overlay mode). Returns an empty xrefs array when no drawing is open. Read-only; opens a database transaction.")]
+    [Description("Lists external references (xrefs) in the active AutoCAD drawing. Uses Database.GetHostDwgXrefGraph(true), skipping the root host node, then reads each xref BlockTableRecord. Each entry has name, path (as stored in the DWG), isLoaded (true when XrefStatus == Resolved), and isAttached (true = Attach mode, false = Overlay mode). Returns an empty xrefs array when no drawing is open. Read-only; opens a database transaction.")]
     public static async Task<string> ListXrefsAsync()
     {
         var xrefs = await HostDispatcher.InvokeOnApplicationThreadAsync(ReadXrefs);
@@ -58,13 +59,26 @@ public static class ListXrefsTool
         using var tx = db.TransactionManager.StartTransaction();
 
         var result = new List<XrefInfo>();
-        foreach (ObjectId id in db.XrefBlockTableRecordIds)
+        using var xrefGraph = db.GetHostDwgXrefGraph(includeGhosts: true);
+        for (int i = 0; i < xrefGraph.NumNodes; i++)
         {
+            var node = xrefGraph.GetXrefNode(i);
+            var id = node.BlockTableRecordId;
+            if (id == ObjectId.Null)
+            {
+                continue;
+            }
+
             var btr = (BlockTableRecord)tx.GetObject(id, OpenMode.ForRead);
+            if (!btr.IsFromExternalReference)
+            {
+                continue;
+            }
+
             result.Add(new XrefInfo(
                 Name: btr.Name,
                 Path: btr.PathName,
-                IsLoaded: btr.IsLoaded,
+                IsLoaded: IsResolvedStatus(btr.XrefStatus),
                 IsAttached: !btr.IsFromOverlayReference));
         }
 
@@ -74,6 +88,8 @@ public static class ListXrefsTool
             .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    internal static bool IsResolvedStatus(XrefStatus status) => status == XrefStatus.Resolved;
 
     /// <summary>
     /// Pure JSON shaping logic for the tool response. Exposed for unit testing with mocked

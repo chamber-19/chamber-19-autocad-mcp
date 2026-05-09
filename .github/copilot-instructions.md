@@ -98,3 +98,7 @@ In AutoCAD: run `MCPSTATUS` to print plugin/runtime info to the editor.
 **Commit 12 (done):** `chamber19_count_entities_by_layer` — counts entities on a named layer via `Editor.SelectAll(new SelectionFilter([new TypedValue((int)DxfCode.LayerName, layerName)]))`. Returns `{count, ts}`. Pattern from `autocad-knowledge/selection_sets.md`. 4 new tests; 55 tests total.
 
 **Slice 13+ (next):** more read-only tools — `polyline_length_by_layer`, `closed_polyline_area_by_layer`, `text_enumeration_by_layer`. `fixtures/` with sample DWGs for end-to-end eval tests. Open issues: ALC isolation (#3) before any external distribution, serverInfo polish (#4) when convenient.
+
+
+<!-- Added by chamber-19-skill-sync — required skill references for this repo's stack -->
+- Read [`docs/skills/AUTOCAD_DOTNET.md`](https://github.com/chamber-19/.github/blob/main/docs/skills/AUTOCAD_DOTNET.md) before any AutoCAD .NET work.

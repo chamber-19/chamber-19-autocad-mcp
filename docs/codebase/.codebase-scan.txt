@@ -1,0 +1,301 @@
+
+=== DIRECTORY TREE (max depth 3, source files only) ===
+.github
+.github\copilot-instructions.md
+.github\dependabot.yml
+.github\workflows
+.github\workflows\copilot-setup-steps.yml
+.gitignore
+autocad-knowledge
+autocad-knowledge\attributes.md
+autocad-knowledge\dimstyles.md
+autocad-knowledge\layouts.md
+autocad-knowledge\polylines.md
+autocad-knowledge\selection_sets.md
+autocad-knowledge\text.md
+autocad-knowledge\xrefs.md
+bundle
+bundle\Chamber19.AutoCad.Mcp.bundle
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64
+bundle\Chamber19.AutoCad.Mcp.bundle\PackageContents.xml
+Chamber19.AutoCad.Mcp.sln
+Directory.Build.props
+docs
+docs\codebase
+docs\codebase\.codebase-scan.txt
+docs\codebase\ARCHITECTURE.md
+docs\codebase\CONCERNS.md
+docs\codebase\CONVENTIONS.md
+docs\codebase\INTEGRATIONS.md
+docs\codebase\STACK.md
+docs\codebase\STRUCTURE.md
+docs\codebase\TESTING.md
+dotnet
+dotnet\AutoCad.Stubs
+dotnet\AutoCad.Stubs\accoremgd
+dotnet\AutoCad.Stubs\accoremgd\AcAppServices.cs
+dotnet\AutoCad.Stubs\accoremgd\accoremgd.csproj
+dotnet\AutoCad.Stubs\accoremgd\AcRuntime.cs
+dotnet\AutoCad.Stubs\acdbmgd
+dotnet\AutoCad.Stubs\acdbmgd\AcDbMgd.cs
+dotnet\AutoCad.Stubs\acdbmgd\acdbmgd.csproj
+dotnet\AutoCad.Stubs\acdbmgd\AcGeometry.cs
+dotnet\AutoCad.Stubs\acmgd
+dotnet\AutoCad.Stubs\acmgd\AcMgd.cs
+dotnet\AutoCad.Stubs\acmgd\acmgd.csproj
+dotnet\AutoCad.Stubs\Directory.Build.props
+dotnet\Chamber19.AutoCad.Mcp
+dotnet\Chamber19.AutoCad.Mcp\Alc
+dotnet\Chamber19.AutoCad.Mcp\Alc\McpHostLoadContext.cs
+dotnet\Chamber19.AutoCad.Mcp\Chamber19.AutoCad.Mcp.csproj
+dotnet\Chamber19.AutoCad.Mcp\Commands.cs
+dotnet\Chamber19.AutoCad.Mcp\Diagnostics
+dotnet\Chamber19.AutoCad.Mcp\Diagnostics\Log.cs
+dotnet\Chamber19.AutoCad.Mcp\Extension.cs
+dotnet\Chamber19.AutoCad.Mcp\Hosting
+dotnet\Chamber19.AutoCad.Mcp\Hosting\AutoCadCompatibility.cs
+dotnet\Chamber19.AutoCad.Mcp\Hosting\McpHostBootstrap.cs
+dotnet\Chamber19.AutoCad.Mcp\Hosting\PortAllocator.cs
+dotnet\Chamber19.AutoCad.Mcp\Hosting\PortFile.cs
+dotnet\Chamber19.AutoCad.Mcp\Properties
+dotnet\Chamber19.AutoCad.Mcp\Properties\AssemblyInfo.cs
+dotnet\Chamber19.AutoCad.Mcp\Threading
+dotnet\Chamber19.AutoCad.Mcp\Threading\AutoCadThreadDispatcher.cs
+dotnet\Chamber19.AutoCad.Mcp.Host
+dotnet\Chamber19.AutoCad.Mcp.Host\Chamber19.AutoCad.Mcp.Host.csproj
+dotnet\Chamber19.AutoCad.Mcp.Host\Diagnostics
+dotnet\Chamber19.AutoCad.Mcp.Host\Diagnostics\HostLog.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Hosting
+dotnet\Chamber19.AutoCad.Mcp.Host\Hosting\Backpressure.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Hosting\BearerAuth.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Hosting\McpServerHost.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Hosting\PluginSnapshot.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\McpHostEntry.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Properties
+dotnet\Chamber19.AutoCad.Mcp.Host\Properties\AssemblyInfo.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Threading
+dotnet\Chamber19.AutoCad.Mcp.Host\Threading\HostDispatcher.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ClosedPolylineAreaByLayerTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\Coordinate3.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\CountEntitiesByLayerTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\EnumerateAttributeValuesByTagTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\EnumerateBlockAttributesTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\FindBlocksByLayoutTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\GetActiveDocumentTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\GetBlockAttributesTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\GetBlockByHandleTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ListBlocksTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ListDimStylesTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ListLayersTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ListLayoutsTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\ListXrefsTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\PingTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\PolylineLengthByLayerTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Host\Tools\TextEnumerationByLayerTool.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests
+dotnet\Chamber19.AutoCad.Mcp.Tests\AutoCadCompatibilityTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\AutoCadThreadDispatcherTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\BackpressureTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\BearerAuthTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\Chamber19.AutoCad.Mcp.Tests.csproj
+dotnet\Chamber19.AutoCad.Mcp.Tests\ClosedPolylineAreaByLayerToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\CountEntitiesByLayerToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\EnumerateAttributeValuesByTagToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\EnumerateBlockAttributesToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\FindBlocksByLayoutToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\GetBlockAttributesToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\GetBlockByHandleToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\ListBlocksToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\ListDimStylesToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\ListLayersToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\ListLayoutsToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\ListXrefsToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\McpEndToEndTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\PolylineLengthByLayerToolTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\PortAllocatorTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\PortFileTests.cs
+dotnet\Chamber19.AutoCad.Mcp.Tests\TextEnumerationByLayerToolTests.cs
+dotnet\Directory.Build.props
+fixtures
+fixtures\README.md
+fixtures\sample.dxf
+fixtures\xref.dxf
+README.md
+spikes
+spikes\aspnetcore-viability
+spikes\aspnetcore-viability\Chamber19.AutoCad.Mcp.Spike.csproj
+spikes\aspnetcore-viability\README.md
+spikes\aspnetcore-viability\SpikeExtension.cs
+tools
+tools\find-mcp.ps1
+tools\install-bundle.ps1
+tools\smoke-test.ps1
+USER_MANUAL.md
+
+=== STACK DETECTION (manifest files) ===
+
+--- Chamber19.AutoCad.Mcp.sln ---
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.0.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chamber19.AutoCad.Mcp", "dotnet\Chamber19.AutoCad.Mcp\Chamber19.AutoCad.Mcp.csproj", "{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{71E6E750-85FD-B5BC-4321-E01377EC6231}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chamber19.AutoCad.Mcp.Tests", "dotnet\Chamber19.AutoCad.Mcp.Tests\Chamber19.AutoCad.Mcp.Tests.csproj", "{5B135467-4A47-405B-8B7C-E909ADB75651}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chamber19.AutoCad.Mcp.Host", "dotnet\Chamber19.AutoCad.Mcp.Host\Chamber19.AutoCad.Mcp.Host.csproj", "{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|x64.Build.0 = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|x64.ActiveCfg = Release|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|x64.Build.0 = Release|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1F6E73C-3D24-4A8E-9C5B-2F8E1D0A4B12}.Release|x86.Build.0 = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|x64.Build.0 = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Debug|x86.Build.0 = Debug|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x64.ActiveCfg = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x64.Build.0 = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x86.ActiveCfg = Release|Any CPU
+		{5B135467-4A47-405B-8B7C-E909ADB75651}.Release|x86.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x64.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x64.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x64.Build.0 = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5B135467-4A47-405B-8B7C-E909ADB75651} = {71E6E750-85FD-B5BC-4321-E01377EC6231}
+		{C3E8F2A1-5B47-4D9E-8C6F-1A2B3D4E5F67} = {71E6E750-85FD-B5BC-4321-E01377EC6231}
+	EndGlobalSection
+EndGlobal
+
+
+=== ENTRY POINTS ===
+No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
+
+=== LINTING AND FORMATTING CONFIG ===
+No linting or formatting config files found in project root.
+
+=== ENVIRONMENT VARIABLE TEMPLATES ===
+No .env.example or .env.template found. Identify required environment variables by searching the code and config for environment variable reads.
+
+=== TODO / FIXME / HACK (production code only, test dirs excluded) ===
+None found.
+
+=== GIT RECENT COMMITS (last 20) ===
+5ddc801 Merge pull request #45 from chamber-19/chore/feat(mcp)--add-new-read-only-query-tools,-align-AutoCAD-2027-xref-API,-docs/manual,-and-markdown-cleanup
+94504d8 chore: add Dependabot configuration
+f8dfe07 Merge pull request #42 from chamber-19/auto/sync-copilot-instructions-5f9ff9f
+fb22da6 chore(instructions): sync Copilot instructions with org skill updates
+21a79d2 feat: update AutoCAD stub path and add verification step; introduce Point3d struct
+fbce920 Merge pull request #39 from chamber-19/chore/feat(mcp)--add-new-read-only-query-tools,-align-AutoCAD-2027-xref-API,-docs/manual,-and-markdown-cleanup
+419eb18 feat(mcp): add new read-only query tools, align AutoCAD 2027 xref API, docs/manual, and markdown cleanup
+358b871 Merge pull request #38 from chamber-19/copilot/add-chamber19-polyline-length-by-layer
+6364d60 feat: add chamber19_polyline_length_by_layer tool (#15)
+8be4e7e Initial plan
+942e9c1 Merge pull request #37 from chamber-19/copilot/add-powershell-helper-for-mcp-port-discovery
+b4ab0a8 feat: add tools/find-mcp.ps1 â€” PowerShell helper for MCP port discovery
+15f02f0 Initial plan
+7a2df00 Merge pull request #36 from chamber-19/copilot/add-smoke-harness-dwg-fixtures
+11e0d3c feat: add smoke harness and DXF fixtures (#15)
+b567b71 Initial plan
+332c9c4 Merge pull request #32 from chamber-19/copilot/feat-implement-custom-assemblyloadcontext-isolatio
+7c1cd7e docs: restore full remarks documentation on four host tools
+ff4f956 Add AutoCAD CI stubs, copilot-setup-steps, ALC isolation skeleton, fix MapMcp path
+13143a2 Initial plan
+
+=== HIGH-CHURN FILES (last 90 days, top 20) ===
+  17 README.md
+   8 .github/copilot-instructions.md
+   8 dotnet/Chamber19.AutoCad.Mcp/Chamber19.AutoCad.Mcp.csproj
+   4 dotnet/Chamber19.AutoCad.Mcp/Extension.cs
+   3 autocad-knowledge/attributes.md
+   3 dotnet/Chamber19.AutoCad.Mcp.Tests/ListXrefsToolTests.cs
+   3 Chamber19.AutoCad.Mcp.sln
+   3 dotnet/Chamber19.AutoCad.Mcp/Commands.cs
+   3 dotnet/Chamber19.AutoCad.Mcp/Hosting/McpServerHost.cs
+   3 dotnet/Chamber19.AutoCad.Mcp.Tests/ListDimStylesToolTests.cs
+   3 dotnet/Chamber19.AutoCad.Mcp/Hosting/PortFile.cs
+   2 .github/workflows/copilot-setup-steps.yml
+   2 autocad-knowledge/layouts.md
+   2 autocad-knowledge/polylines.md
+   2 autocad-knowledge/xrefs.md
+   2 dotnet/AutoCad.Stubs/acdbmgd/AcDbMgd.cs
+   2 dotnet/Chamber19.AutoCad.Mcp.Host/Tools/ListXrefsTool.cs
+   2 dotnet/Chamber19.AutoCad.Mcp.Host/Tools/CountEntitiesByLayerTool.cs
+   2 dotnet/Chamber19.AutoCad.Mcp.Host/Tools/EnumerateBlockAttributesTool.cs
+   2 dotnet/Chamber19.AutoCad.Mcp.Host/Tools/GetBlockAttributesTool.cs
+
+=== MONOREPO SIGNALS ===
+No monorepo signals detected.
+
+=== CODE METRICS ===
+Total files scanned: 116
+Total lines of code: 5811
+
+Files by language:
+  C#: 62
+  Other: 54
+
+Top 10 largest files:
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\ModelContextProtocol.Core.dll: 1153.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\ModelContextProtocol.Core.dll: 1153.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\Microsoft.Extensions.AI.Abstractions.dll: 656.3KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\Microsoft.Extensions.AI.Abstractions.dll: 656.3KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\ModelContextProtocol.AspNetCore.dll: 124.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\ModelContextProtocol.AspNetCore.dll: 124.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\Chamber19.AutoCad.Mcp.Host.dll: 110.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\ModelContextProtocol.dll: 86.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\ModelContextProtocol.dll: 86.0KB
+bundle\Chamber19.AutoCad.Mcp.bundle\Contents\Win64\private\Chamber19.AutoCad.Mcp.Host.pdb: 38.6KB
+
+=== CI/CD PIPELINES ===
+CI/CD: GitHub Actions
+
+=== CONTAINERS & ORCHESTRATION ===
+No containerization configs detected.
+
+=== SECURITY & COMPLIANCE ===
+No security configs detected.
+
+=== PERFORMANCE & TESTING ===
+No performance testing configs detected.
+
+=== SCAN COMPLETE ===

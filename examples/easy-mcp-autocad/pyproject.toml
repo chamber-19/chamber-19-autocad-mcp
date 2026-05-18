@@ -1,0 +1,15 @@
+[project]
+name = "autocad-mcp-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "comtypes>=1.4.10",
+    "mcp[cli]>=1.4.1",
+    "psycopg2-binary>=2.9.10",
+    "pyautocad>=0.2.0",
+    "pyinstaller>=6.12.0",
+    "pywin32>=309",
+    "sqlalchemy>=2.0.39",
+]
